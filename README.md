@@ -57,7 +57,13 @@
 > **Just want to try it?** Visit the live app:
 > 👉 [https://traveloop-1-8f1k.onrender.com](https://traveloop-1-8f1k.onrender.com)
 >
-> Demo login: `traveler_demo` / `demo12345`
+> **Demo Login (Normal User):**
+> Email/Username: `sndarji172007@gmail.com`
+> Password: `Naiya@2002`
+> 
+> **Admin Login (Superuser):**
+> Username: `Naiya`
+> Password: `Shlesh@17`
 
 ### 1. Clone the repository
 

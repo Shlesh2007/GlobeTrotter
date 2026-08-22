@@ -2,7 +2,6 @@
 
 > A full-stack travel planning web app built with Django. Plan trips, build itineraries, track budgets, manage packing lists, and book curated travel packages — all in one place.
 
-🌐 **Live Demo:** [https://traveloop-1-8f1k.onrender.com](https://traveloop-1-8f1k.onrender.com)
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![Django](https://img.shields.io/badge/Django-5.0.14-green?logo=django)

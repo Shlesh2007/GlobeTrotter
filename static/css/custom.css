@@ -1,18 +1,55 @@
+html, body {
+  overscroll-behavior: none;
+  scroll-behavior: smooth;
+}
+
 body.app-body {
-  background: radial-gradient(circle at top left, #1f2937 0%, #0f172a 35%, #020617 100%);
+  background: 
+    linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(2, 6, 23, 0.95) 100%),
+    url('https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed;
+  background-size: cover;
   color: #e2e8f0;
   min-height: 100vh;
   font-family: "Inter", sans-serif;
 }
 
 .app-navbar {
-  background: rgba(10, 16, 31, 0.72);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(10, 16, 31, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.carousel-item {
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.navbar-nav .nav-link {
+  border-radius: 50rem;
+  padding: 0.5rem 1rem !important;
+  margin: 0 0.15rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar-nav .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-nav .nav-link.active {
+  background-color: rgba(56, 189, 248, 0.15); /* Soft sky blue pill for active page */
+  color: #bae6fd !important; /* Sky 200 text */
+  font-weight: 600;
+}
+
+.navbar-nav .nav-link:active {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: scale(0.92);
 }
 
 .app-footer {
-  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(10, 16, 31, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .brand-badge {
@@ -22,29 +59,38 @@ body.app-body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0ea5e9, #7c3aed);
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .glass-card {
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 1rem;
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .trip-row {
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
 }
 
 .trip-card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .trip-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.3);
+  transform: translateY(-6px) scale(1.02);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .auth-wrap {
@@ -100,4 +146,42 @@ textarea:-webkit-autofill,
 select:-webkit-autofill {
   -webkit-text-fill-color: #f8fafc !important;
   -webkit-box-shadow: 0 0 0 1000px rgba(15, 23, 42, 0.95) inset !important;
+}
+.auth-box {
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 40px rgba(14, 165, 233, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-box:hover {
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7), 0 0 60px rgba(14, 165, 233, 0.25);
+}
+
+.auth-avatar {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  border: 4px solid #0f172a;
+  box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.5);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.auth-box:hover .auth-avatar {
+  transform: rotate(10deg) scale(1.1);
+}
+
+.auth-input {
+  background: rgba(0,0,0,0.2) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+  transition: all 0.3s ease !important;
+}
+
+.auth-input:focus {
+  background: rgba(0,0,0,0.4) !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15) !important;
 }

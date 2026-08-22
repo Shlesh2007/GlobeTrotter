@@ -1,27 +1,43 @@
 <nav id="main-navbar" class="navbar navbar-expand-lg navbar-dark sticky-top app-navbar">
   <div class="container-fluid px-4">
     <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="{% if user.is_authenticated %}{% url 'travel:dashboard' %}{% else %}{% url 'login' %}{% endif %}">
-      <span class="brand-badge"><i class="bi bi-airplane-engines-fill"></i></span> Traveloop
+      <span class="brand-badge"><i class="bi bi-airplane-engines-fill"></i></span> GlobeTrotter
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="topNav">
-      <ul class="navbar-nav ms-auto align-items-lg-center">
+      <!-- Public Links (Left/Center) -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'travel:home' %}">Home</a></li>
+        <li class="nav-item"><a class="nav-link {% if 'destinations' in request.path %}active{% endif %}" href="{% url 'travel:destination_list' %}">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link {% if 'packages' in request.path %}active{% endif %}" href="{% url 'travel:package_list' %}">Packages</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'search' %}active{% endif %}" href="{% url 'travel:search' %}"><i class="bi bi-search me-1"></i> Search</a></li>
+      </ul>
+
+      <!-- User Links (Right) -->
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-2 mt-3 mt-lg-0">
         {% if user.is_authenticated %}
-        <li class="nav-item"><a class="nav-link" href="{% url 'travel:dashboard' %}">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'travel:my_trips' %}">My Trips</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'travel:trip_create' %}">Create Trip</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'travel:profile' %}">Profile</a></li>
-        <li class="nav-item ms-lg-2">
-          <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-outline-light rounded-pill px-3">Logout</button>
-          </form>
+        <li class="nav-item"><a class="nav-link fw-semibold text-sky-200 {% if 'dashboard' in request.path %}active{% endif %}" href="{% url 'travel:dashboard' %}"><i class="bi bi-grid-1x2-fill me-1"></i> Dashboard</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 {% if 'trips' in request.path or 'profile' in request.path %}active{% endif %}" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle fs-5"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark glass-panel border-white/10" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item text-white/80" href="{% url 'travel:my_trips' %}">My Trips</a></li>
+            <li><a class="dropdown-item text-white/80" href="{% url 'travel:profile' %}">Profile Settings</a></li>
+            <li><hr class="dropdown-divider border-white/10"></li>
+            <li>
+              <form method="post" action="{% url 'logout' %}" class="px-3 py-1">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-light w-100 rounded-pill">Logout</button>
+              </form>
+            </li>
+          </ul>
         </li>
         {% else %}
         <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-        <li class="nav-item ms-lg-2"><a class="btn btn-sm btn-primary rounded-pill px-3" href="{% url 'signup' %}">Signup</a></li>
+        <li class="nav-item"><a class="btn btn-sm btn-primary rounded-pill px-4" style="background:linear-gradient(135deg, #0ea5e9, #6366f1); border:none;" href="{% url 'signup' %}">Sign Up</a></li>
         {% endif %}
       </ul>
     </div>

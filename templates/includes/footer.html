@@ -1,8 +1,11 @@
 <footer class="py-4 mt-5 app-footer">
   <div class="container-fluid px-lg-4">
-    <div class="glass-card p-3 d-flex flex-column flex-md-row justify-content-between align-items-center">
-      <span class="small text-secondary">© {% now "Y" %} Traveloop - Personalized Travel Planning</span>
-      <span class="small text-secondary">Built with Django + Bootstrap 5</span>
+    <div class="glass-card p-4 d-flex flex-column flex-md-row justify-content-between align-items-center text-center">
+      <div class="d-flex gap-4 mb-3 mb-md-0">
+        <a href="{% url 'travel:about' %}" class="text-white fw-semibold text-decoration-none hover:text-sky-300 transition">About Us</a>
+        <a href="{% url 'travel:contact' %}" class="text-white fw-semibold text-decoration-none hover:text-sky-300 transition">Contact</a>
+      </div>
+      <span class="small text-secondary">© {% now "Y" %} GlobeTrotter - Personalized Travel Planning</span>
     </div>
   </div>
 </footer>

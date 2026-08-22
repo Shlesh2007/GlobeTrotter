@@ -7,8 +7,14 @@
     <a href="{% url 'travel:city_search' %}" class="list-group-item list-group-item-action">City Search</a>
     <a href="{% url 'travel:activity_search' %}" class="list-group-item list-group-item-action">Activity Search</a>
     <a href="{% url 'travel:profile' %}" class="list-group-item list-group-item-action">Profile</a>
+    {% if user.is_staff %}
+    <a href="{% url 'travel:analytics_dashboard' %}" class="list-group-item list-group-item-action text-primary fw-medium">
+      <i class="bi bi-graph-up me-1"></i> Admin Dashboard
+    </a>
+    {% endif %}
   </div>
   <hr class="border-secondary-subtle">
+
   <p class="small text-secondary mb-2">Recent trips</p>
   {% for trip in nav_recent_trips %}
     <a class="d-block text-decoration-none small mb-1 text-info" href="{% url 'travel:trip_detail' trip.id %}">{{ trip.title }}</a>

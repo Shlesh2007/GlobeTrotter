@@ -4,32 +4,115 @@
 
 {% block content %}
 <section class="py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">My Trips</h1>
-    <a href="{% url 'travel:trip_create' %}" class="btn btn-primary rounded-pill">Create Trip</a>
-  </div>
-  <div class="row g-3">
-    {% for trip in trips %}
-    <div class="col-md-6 col-xl-4">
-      <div class="glass-card trip-card h-100">
-        {% if trip.cover_image %}
-        <img src="{{ trip.cover_image.url }}" class="card-img-top rounded-top-4" style="height:180px;object-fit:cover;" alt="{{ trip.title }}">
-        {% endif %}
-        <div class="p-3">
-          <h2 class="h6 mb-1">{{ trip.title }}</h2>
-          <p class="small text-secondary">{{ trip.start_date }} to {{ trip.end_date }}</p>
-          <p class="small">{{ trip.description|truncatechars:110 }}</p>
-          <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'travel:trip_detail' trip.id %}" class="btn btn-sm btn-outline-light rounded-pill">Open</a>
-            <a href="{% url 'travel:trip_edit' trip.id %}" class="btn btn-sm btn-outline-light rounded-pill">Edit</a>
-            <a href="{% url 'travel:budget_breakdown' trip.id %}" class="btn btn-sm btn-outline-light rounded-pill">Budget</a>
-          </div>
-        </div>
-      </div>
+  <div class="container-fluid p-lg-4" style="max-width: 900px;">
+    
+    <!-- Search & Filters Row -->
+    <div class="d-flex flex-column flex-md-row gap-3 mb-5 align-items-center">
+      <form action="{% url 'travel:search' %}" method="get" class="d-flex flex-grow-1 w-100">
+        <input type="text" name="q" class="form-control auth-input" placeholder="Search trips or destinations..." style="border-radius: 12px; padding: 0.75rem 1.25rem; font-size: 1rem;">
+        <button type="submit" class="d-none">Search</button>
+      </form>
     </div>
-    {% empty %}
-    <div class="col-12"><div class="glass-card p-4">No trips yet. Create your first itinerary.</div></div>
-    {% endfor %}
+
+    <!-- Ongoing -->
+    <div class="mb-5">
+      <h2 class="h6 text-white mb-3 fw-bold">Ongoing</h2>
+      {% for trip in ongoing_trips %}
+      <div class="glass-card p-3 mb-3 position-relative d-flex gap-3 align-items-center" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+        {% if trip.cover_image %}
+          <div style="width: 100px; height: 100px; border-radius: 8px; background: url('{{ trip.cover_image.url }}') center/cover; flex-shrink: 0;"></div>
+        {% else %}
+          <div class="d-flex align-items-center justify-content-center bg-dark" style="width: 100px; height: 100px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
+            <i class="bi bi-image text-white/50 fs-3"></i>
+          </div>
+        {% endif %}
+        <div class="flex-grow-1">
+          <h3 class="h5 text-white mb-1">{{ trip.title }}</h3>
+          <p class="small text-white/50 mb-2"><i class="bi bi-calendar3 me-1"></i>{{ trip.start_date }} to {{ trip.end_date }}</p>
+          <p class="text-white/70 small mb-0">{{ trip.description|truncatechars:100 }}</p>
+        </div>
+        <div class="ms-auto d-flex flex-column gap-2" style="position: relative; z-index: 2;">
+          <a href="{% url 'travel:trip_edit' trip.id %}" class="btn btn-sm btn-outline-light rounded-circle" title="Edit"><i class="bi bi-pencil"></i></a>
+          <form method="post" action="{% url 'travel:trip_delete' trip.id %}" class="m-0" onsubmit="return confirm('Are you sure you want to delete this trip?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+        <a href="{% url 'travel:trip_detail' trip.id %}" class="stretched-link" style="z-index: 1;"></a>
+      </div>
+      {% empty %}
+      <div class="glass-card p-4 mb-3 d-flex align-items-center justify-content-center" style="min-height: 120px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+        <span class="text-white/50">No ongoing trips.</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Up-coming -->
+    <div class="mb-5">
+      <h2 class="h6 text-white mb-3 fw-bold">Up-coming</h2>
+      {% for trip in upcoming_trips %}
+      <div class="glass-card p-3 mb-3 position-relative d-flex gap-3 align-items-center" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+        {% if trip.cover_image %}
+          <div style="width: 100px; height: 100px; border-radius: 8px; background: url('{{ trip.cover_image.url }}') center/cover; flex-shrink: 0;"></div>
+        {% else %}
+          <div class="d-flex align-items-center justify-content-center bg-dark" style="width: 100px; height: 100px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
+            <i class="bi bi-image text-white/50 fs-3"></i>
+          </div>
+        {% endif %}
+        <div class="flex-grow-1">
+          <h3 class="h5 text-white mb-1">{{ trip.title }}</h3>
+          <p class="small text-white/50 mb-2"><i class="bi bi-calendar3 me-1"></i>{{ trip.start_date }} to {{ trip.end_date }}</p>
+          <p class="text-white/70 small mb-0">{{ trip.description|truncatechars:100 }}</p>
+        </div>
+        <div class="ms-auto d-flex flex-column gap-2" style="position: relative; z-index: 2;">
+          <a href="{% url 'travel:trip_edit' trip.id %}" class="btn btn-sm btn-outline-light rounded-circle" title="Edit"><i class="bi bi-pencil"></i></a>
+          <form method="post" action="{% url 'travel:trip_delete' trip.id %}" class="m-0" onsubmit="return confirm('Are you sure you want to delete this trip?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+        <a href="{% url 'travel:trip_detail' trip.id %}" class="stretched-link" style="z-index: 1;"></a>
+      </div>
+      {% empty %}
+      <div class="glass-card p-4 mb-3 d-flex align-items-center justify-content-center" style="min-height: 120px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+        <span class="text-white/50">No upcoming trips.</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Completed -->
+    <div class="mb-5">
+      <h2 class="h6 text-white mb-3 fw-bold">Completed</h2>
+      {% for trip in completed_trips %}
+      <div class="glass-card p-3 mb-3 position-relative d-flex gap-3 align-items-center" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+        {% if trip.cover_image %}
+          <div style="width: 100px; height: 100px; border-radius: 8px; background: url('{{ trip.cover_image.url }}') center/cover; flex-shrink: 0;"></div>
+        {% else %}
+          <div class="d-flex align-items-center justify-content-center bg-dark" style="width: 100px; height: 100px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
+            <i class="bi bi-image text-white/50 fs-3"></i>
+          </div>
+        {% endif %}
+        <div class="flex-grow-1">
+          <h3 class="h5 text-white mb-1">{{ trip.title }}</h3>
+          <p class="small text-white/50 mb-2"><i class="bi bi-calendar3 me-1"></i>{{ trip.start_date }} to {{ trip.end_date }}</p>
+          <p class="text-white/70 small mb-0">{{ trip.description|truncatechars:100 }}</p>
+        </div>
+        <div class="ms-auto d-flex flex-column gap-2" style="position: relative; z-index: 2;">
+          <a href="{% url 'travel:trip_edit' trip.id %}" class="btn btn-sm btn-outline-light rounded-circle" title="Edit"><i class="bi bi-pencil"></i></a>
+          <form method="post" action="{% url 'travel:trip_delete' trip.id %}" class="m-0" onsubmit="return confirm('Are you sure you want to delete this trip?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+        <a href="{% url 'travel:trip_detail' trip.id %}" class="stretched-link" style="z-index: 1;"></a>
+      </div>
+      {% empty %}
+      <div class="glass-card p-4 mb-3 d-flex align-items-center justify-content-center" style="min-height: 120px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+        <span class="text-white/50">No completed trips.</span>
+      </div>
+      {% endfor %}
+    </div>
+
   </div>
 </section>
 {% endblock %}

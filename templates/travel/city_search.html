@@ -4,24 +4,101 @@
 
 {% block content %}
 <section class="py-4">
-  <h1 class="h4 mb-3">City Search</h1>
-  <div class="glass-card p-4 mb-3">
-    <form method="get" class="row g-2">
-      <div class="col-md-6">{{ form.q }}</div>
-      <div class="col-md-3">{{ form.start }}</div>
-      <div class="col-md-3">{{ form.end }}</div>
-      <div class="col-12"><button class="btn btn-primary rounded-pill">Search</button></div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0 text-white">City Search</h1>
+  </div>
+
+  <div class="glass-card p-4 mb-4" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-6">
+        <label class="form-label text-white/70 small mb-1">Keyword Search</label>
+        {{ form.q }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label text-white/70 small mb-1">Filter by Region/Country</label>
+        <select name="country" class="form-select auth-input shadow-none text-white" style="border-radius: 8px;">
+          <option value="">All Regions</option>
+          {% for country in countries %}
+            <option value="{{ country }}" {% if selected_country == country %}selected{% endif %}>{{ country }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary rounded-pill w-100">Search</button>
+      </div>
     </form>
   </div>
-  <div class="glass-card p-4">
-    {% for city in cities %}
-      <div class="trip-row p-3 rounded-3 mb-2">
-        <strong>{{ city.city_name }}, {{ city.country }}</strong>
-        <div class="small text-secondary">{{ city.trip.title }} · {{ city.arrival_date }} → {{ city.departure_date }}</div>
+
+  <div class="row g-4">
+    {% for dest in destinations %}
+      <div class="col-md-6 col-lg-4">
+        <div class="glass-card h-100 position-relative overflow-hidden d-flex flex-column" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+          <div style="height: 160px; background: url('{{ dest.image_url }}') center/cover;">
+          </div>
+          <div class="p-4 flex-grow-1 d-flex flex-column">
+            <h3 class="h5 text-white mb-1">{{ dest.name }}</h3>
+            <p class="text-white/60 small mb-3"><i class="bi bi-geo-alt"></i> {{ dest.country }}</p>
+            
+            <p class="text-white/80 small mb-4">{{ dest.short_description }}</p>
+
+            <div class="d-flex justify-content-between align-items-center mb-4 mt-auto">
+              <span class="badge bg-secondary/50 border border-white/20 text-white fw-normal px-2 py-1">
+                Cost: {{ dest.cost_index }}
+              </span>
+              <span class="badge bg-success/20 text-success border border-success/30 fw-normal px-2 py-1">
+                Score: {{ dest.popularity }}/100
+              </span>
+            </div>
+            
+            <button class="btn btn-outline-info rounded-pill w-100" data-bs-toggle="modal" data-bs-target="#addTripModal{{ dest.id }}">
+              Add to Trip
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal for Adding to Trip -->
+      <div class="modal fade" id="addTripModal{{ dest.id }}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content glass-card border border-white/20">
+            <div class="modal-header border-white/10">
+              <h5 class="modal-title text-white">Add {{ dest.name }} to Trip</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="dest_id" value="{{ dest.id }}">
+              <div class="modal-body text-white">
+                <p class="small text-white/70 mb-3">Which trip would you like to add this city stop to?</p>
+                <select name="trip_id" class="form-select auth-input shadow-none text-white" style="border-radius: 8px;" required>
+                  <option value="">Select a trip...</option>
+                  {% for trip in user_trips %}
+                    <option value="{{ trip.id }}">{{ trip.title }} ({{ trip.start_date|date:"M Y" }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="modal-footer border-white/10">
+                <button type="submit" class="btn btn-primary rounded-pill w-100">Confirm & Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     {% empty %}
-      <p class="text-secondary mb-0">No city stops found.</p>
+      <div class="col-12 text-center py-5">
+        <p class="text-white/60 mb-0">No destinations found matching your criteria.</p>
+      </div>
     {% endfor %}
   </div>
 </section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const qInput = document.getElementById('id_q');
+    if (qInput) {
+      qInput.classList.add('form-control', 'auth-input', 'shadow-none', 'text-white');
+      qInput.style.borderRadius = '8px';
+    }
+  });
+</script>
 {% endblock %}

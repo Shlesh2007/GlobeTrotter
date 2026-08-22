@@ -11,7 +11,21 @@
         <h1 class="display-4 font-display fw-bold mb-3">{{ destination.name }}</h1>
         <p class="lead text-white/70">{{ destination.short_description }}</p>
         <p class="text-white/75">{{ destination.description }}</p>
-        <a href="{% url 'travel:search' %}?country={{ destination.country|urlencode }}" class="btn btn-outline-light rounded-pill mt-2">Find similar trips</a>
+        <div class="d-flex gap-2 mt-3">
+            <a href="{% url 'travel:search' %}?country={{ destination.country|urlencode }}" class="btn btn-outline-light rounded-pill">Find similar trips</a>
+            {% if user.is_authenticated %}
+            <form action="{% url 'travel:toggle_save_destination' destination.slug %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-light rounded-pill">
+                    {% if destination in user.profile.saved_destinations.all %}
+                    <i class="bi bi-bookmark-fill text-danger"></i> Saved
+                    {% else %}
+                    <i class="bi bi-bookmark"></i> Save Destination
+                    {% endif %}
+                </button>
+            </form>
+            {% endif %}
+        </div>
       </div>
       <div class="col-lg-5">
         <div class="rounded-4 overflow-hidden shadow-2xl border border-white/10">
@@ -34,7 +48,7 @@
           <p class="small text-white/65">{{ pkg.headline }}</p>
           <p class="small text-white/55">{{ pkg.duration_days }} nights · Up to {{ pkg.max_travelers }} travelers</p>
           <div class="mt-auto pt-3 d-flex justify-content-between align-items-center">
-            <strong class="text-sky-200">${{ pkg.price_per_person }}/person</strong>
+            <strong class="text-sky-200">₹{{ pkg.price_per_person }}/person</strong>
             {% if user.is_authenticated %}
             <a href="{% url 'travel:package_book' pkg.id %}" class="btn btn-sm btn-light rounded-pill">Reserve</a>
             {% else %}

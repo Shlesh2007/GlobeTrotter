@@ -3,58 +3,127 @@
 {% block title %}Itinerary Builder{% endblock %}
 
 {% block content %}
-<section class="py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Itinerary Builder · {{ trip.title }}</h1>
-    <a href="{% url 'travel:trip_detail' trip.id %}" class="btn btn-outline-light rounded-pill">Back to Trip</a>
-  </div>
-  <div class="row g-3">
-    <div class="col-xl-4">
-      <div class="glass-card p-4 mb-3">
-        <h2 class="h6">Add City Stop</h2>
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="add_city">
-          {{ city_form.as_p }}
-          <button class="btn btn-primary w-100 rounded-pill">Add City</button>
-        </form>
-      </div>
-      <div class="glass-card p-4">
-        <h2 class="h6">Add Activity</h2>
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="add_activity">
-          {{ activity_form.as_p }}
-          <button class="btn btn-primary w-100 rounded-pill">Add Activity</button>
-        </form>
+<section class="py-4 position-relative">
+  <div class="container-fluid p-lg-4" style="max-width: 900px;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h4 mb-0 text-white">Itinerary Builder · {{ trip.title }}</h1>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#cityModal">Add Stop</button>
+        <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#activityModal">Add Activity</button>
+        <a href="{% url 'travel:trip_detail' trip.id %}" class="btn btn-outline-light rounded-pill">Back to Trip</a>
       </div>
     </div>
-    <div class="col-xl-8">
-      <div class="glass-card p-4">
-        <h2 class="h6 mb-3">Current Plan</h2>
-        {% for stop in city_stops %}
-        <div class="trip-row p-3 rounded-3 mb-3">
-          <div class="d-flex justify-content-between align-items-center">
-            <strong>{{ stop.order }}. {{ stop.city_name }}, {{ stop.country }}</strong>
-            <div class="d-flex gap-1">
-              <a href="{% url 'travel:city_stop_move' trip.id stop.id 'up' %}" class="btn btn-sm btn-outline-light">↑</a>
-              <a href="{% url 'travel:city_stop_move' trip.id stop.id 'down' %}" class="btn btn-sm btn-outline-light">↓</a>
+
+    <!-- Empty space for layout matching -->
+    <div class="mb-4"></div>
+
+    <!-- The Stacked Sections (Screen 5) -->
+    <div class="d-flex flex-column gap-4">
+      {% for stop in city_stops %}
+      <div class="glass-card p-4 position-relative" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+        
+        <h3 class="h6 text-white mb-2 fw-bold">Section {{ stop.order }}: {{ stop.city_name }}, {{ stop.country }}</h3>
+        
+        <div class="small text-white/70 mb-4 mt-3">
+          {% for activity in stop.activities.all %}
+          <div class="d-flex justify-content-between align-items-center border-bottom border-white/10 py-2">
+            <div>
+              <span>• {{ activity.title }} ({{ activity.category }})</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <span>₹{{ activity.cost }}</span>
+              <form method="post" action="{% url 'travel:activity_delete' activity.id %}" onsubmit="return confirm('Remove this activity?');" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none">×</button>
+              </form>
             </div>
           </div>
-          <small class="text-secondary">{{ stop.arrival_date }} - {{ stop.departure_date }}</small>
-          <div class="mt-2">
-            {% for activity in stop.activities.all %}
-            <div class="small mb-1">• {{ activity.title }} ({{ activity.category }}) - ${{ activity.cost }}</div>
-            {% empty %}
-            <div class="small text-secondary">No activities yet.</div>
-            {% endfor %}
+          {% empty %}
+          <span class="text-white/40 fst-italic">No activities planned for this section yet. Use the 'Add Activity' button above to add some!</span>
+          {% endfor %}
+        </div>
+
+        <div class="d-flex gap-3 flex-wrap">
+          <div class="px-3 py-1" style="border: 1px solid rgba(255,255,255,0.3); border-radius: 8px;">
+            <span class="small text-white">Date Range: {{ stop.arrival_date }} to {{ stop.departure_date }}</span>
+          </div>
+          <div class="px-3 py-1" style="border: 1px solid rgba(255,255,255,0.3); border-radius: 8px;">
+            <span class="small text-white">Budget of this section: ₹{{ stop.total_budget|default:"0" }}</span>
           </div>
         </div>
-        {% empty %}
-        <p class="text-secondary mb-0">No stops yet. Start by adding one.</p>
-        {% endfor %}
+
+        <!-- Floating Ordering Arrows -->
+        <div class="position-absolute top-0 end-0 p-3">
+          <a href="{% url 'travel:city_stop_move' trip.id stop.id 'up' %}" class="btn btn-sm btn-outline-light py-0 px-2">↑</a>
+          <a href="{% url 'travel:city_stop_move' trip.id stop.id 'down' %}" class="btn btn-sm btn-outline-light py-0 px-2">↓</a>
+        </div>
       </div>
+      {% empty %}
+      <div class="glass-card p-4 text-center py-5" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+        <h3 class="h5 text-white mb-2">No Sections Yet</h3>
+        <p class="small text-white/70 mb-0">Use the 'Add Stop' button above to add your first city stop.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+
+</section>
+
+<!-- Modals for Data Entry (Restoring Functionality) -->
+<div class="modal fade" id="cityModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-card border border-white/20">
+      <div class="modal-header border-white/10">
+        <h5 class="modal-title text-white">Add Stop</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_city">
+        <div class="modal-body text-white">
+          {{ city_form.as_p }}
+        </div>
+        <div class="modal-footer border-white/10">
+          <button type="submit" class="btn btn-primary rounded-pill w-100">Save City</button>
+        </div>
+      </form>
     </div>
   </div>
-</section>
+</div>
+
+<div class="modal fade" id="activityModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-card border border-white/20">
+      <div class="modal-header border-white/10">
+        <h5 class="modal-title text-white">Add Activity</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_activity">
+        <div class="modal-body text-white">
+          {{ activity_form.as_p }}
+        </div>
+        <div class="modal-footer border-white/10">
+          <button type="submit" class="btn btn-primary rounded-pill w-100">Save Activity</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const inputs = document.querySelectorAll('.modal-body input, .modal-body select, .modal-body textarea');
+    inputs.forEach(input => {
+      if(input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'hidden') {
+        input.classList.add('form-control', 'auth-input', 'shadow-none', 'text-white', 'mb-2');
+        input.style.borderRadius = '8px';
+      }
+    });
+  });
+</script>
 {% endblock %}

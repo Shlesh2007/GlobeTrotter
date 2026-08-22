@@ -1,86 +1,167 @@
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
+{% block favicon %}📊{% endblock %}
 
 {% block content %}
 <section class="py-4">
-  <div class="container-fluid p-0">
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <div>
-      <p class="small text-secondary text-uppercase mb-1">Welcome back</p>
-      <h1 class="h3 mb-1">{{ user.first_name|default:user.username }}, ready for your next trip?</h1>
-      <p class="text-secondary mb-0">Manage itinerary, budget, packing, and notes from one dashboard.</p>
-    </div>
+  <div class="container-fluid p-lg-4" style="max-width: 1100px;">
     
-    <div class="d-flex gap-2">
-      <a class="btn btn-primary rounded-pill px-4 d-inline-flex align-items-center" href="{% url 'travel:trip_create' %}">
-        <i class="bi bi-plus-circle me-2"></i>Create Trip
-      </a>
-      <a class="btn btn-outline-light rounded-pill px-4" href="{% url 'travel:my_trips' %}">
-        View Trips
-      </a>
-    </div>
-  </div>
-
-    <div class="row g-3 mb-4">
-      <div class="col-md-6 col-xl-3"><div class="glass-card p-3"><p class="small text-secondary mb-1">Total Trips</p><h3 class="mb-0">{{ trips_count }}</h3></div></div>
-      <div class="col-md-6 col-xl-3"><div class="glass-card p-3"><p class="small text-secondary mb-1">City Stops</p><h3 class="mb-0">{{ city_count }}</h3></div></div>
-      <div class="col-md-6 col-xl-3"><div class="glass-card p-3"><p class="small text-secondary mb-1">Activities</p><h3 class="mb-0">{{ activity_count }}</h3></div></div>
-      <div class="col-md-6 col-xl-3"><div class="glass-card p-3"><p class="small text-secondary mb-1">Total Budget</p><h3 class="mb-0">${{ total_budget }}</h3></div></div>
+    <!-- Banner Image -->
+    <div class="glass-card mb-4 d-flex align-items-center justify-content-center position-relative overflow-hidden" style="height: 250px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+      <!-- Vibrant natural background without milky filters -->
+      <div class="position-absolute w-100 h-100 top-0 start-0" style="background: url('https://loremflickr.com/1200/400/hills,landscape?lock=22') center/cover; z-index: 0; filter: brightness(0.8);"></div>
+      <!-- Welcome Text -->
+      <div class="text-center position-relative" style="z-index: 1;">
+        <h2 class="display-5 fw-bold text-white shadow-lg" style="text-shadow: 0 4px 15px rgba(0,0,0,0.9);">Welcome back, {{ user.first_name|default:user.username }}!</h2>
+        <p class="lead text-white fw-semibold" style="text-shadow: 0 2px 10px rgba(0,0,0,0.9);">Ready for your next adventure?</p>
+      </div>
     </div>
 
-    <div class="row g-4">
-      <div class="col-xl-8">
-        <div class="glass-card p-4 mb-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h5 mb-0">Upcoming Trips</h2>
-            <a class="small text-info text-decoration-none" href="{% url 'travel:my_trips' %}">View all</a>
-          </div>
-          {% for trip in upcoming_trips %}
-          <div class="trip-row p-3 mb-2 rounded-3">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <p class="mb-1 fw-semibold">{{ trip.title }}</p>
-                <p class="small text-secondary mb-0">{{ trip.start_date }} to {{ trip.end_date }}</p>
+    <!-- Search & Filters Row -->
+    <div class="d-flex flex-column flex-md-row gap-3 mb-5 align-items-center">
+      <form action="{% url 'travel:search' %}" method="get" class="d-flex flex-grow-1">
+        <input type="text" name="q" class="form-control auth-input" placeholder="Search destinations or packages..." style="border-radius: 12px; padding: 0.75rem 1.25rem; font-size: 1rem;">
+        <button type="submit" class="d-none">Search</button>
+      </form>
+      <div class="d-flex gap-2">
+        <div class="dropdown">
+          <button class="btn dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; color: white; padding: 0.75rem 1.25rem;">
+            <i class="bi bi-funnel"></i>
+            {% if request.GET.filter == 'upcoming' %}Upcoming
+            {% elif request.GET.filter == 'past' %}Past Trips
+            {% else %}Filter{% endif %}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1);">
+            <li><a class="dropdown-item text-white hover:bg-white/10" href="#" onclick="updateUrlParam('filter', 'upcoming'); return false;">Upcoming Trips</a></li>
+            <li><a class="dropdown-item text-white hover:bg-white/10" href="#" onclick="updateUrlParam('filter', 'past'); return false;">Past Trips</a></li>
+            <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+            <li><a class="dropdown-item text-white hover:bg-white/10" href="#" onclick="updateUrlParam('filter', ''); return false;">Clear Filters</a></li>
+          </ul>
+        </div>
+
+        <div class="dropdown">
+          <button class="btn dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; color: white; padding: 0.75rem 1.25rem;">
+            <i class="bi bi-sort-down"></i>
+            {% if request.GET.sort == 'oldest' %}Oldest First
+            {% elif request.GET.sort == 'newest' %}Newest First
+            {% else %}Sort by{% endif %}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1);">
+            <li><a class="dropdown-item text-white hover:bg-white/10" href="#" onclick="updateUrlParam('sort', 'newest'); return false;">Newest First</a></li>
+            <li><a class="dropdown-item text-white hover:bg-white/10" href="#" onclick="updateUrlParam('sort', 'oldest'); return false;">Oldest First</a></li>
+            <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+            <li><a class="dropdown-item text-white hover:bg-white/10" href="#" onclick="updateUrlParam('sort', ''); return false;">Clear Sorting</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Previous Trips -->
+    <div class="mb-5 position-relative" id="previous-trips-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="h5 text-white mb-0">Previous Trips</h3>
+        <a href="{% url 'travel:trip_create' %}" class="btn btn-outline-light btn-sm px-3 fw-semibold" style="border-radius: 8px;">+ Plan a trip</a>
+      </div>
+      <div class="row g-3 mb-4">
+        {% for trip in recent_trips|slice:":3" %}
+        <div class="col-md-4">
+          <div class="glass-card p-3 d-flex flex-column h-100" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+            {% if trip.cover_image %}
+              <div style="height: 120px; border-radius: 8px; background: url('{{ trip.cover_image.url }}') center/cover; margin-bottom: 1rem;"></div>
+            {% else %}
+              <div class="d-flex align-items-center justify-content-center" style="height: 120px; border-radius: 8px; background: rgba(255,255,255,0.05); margin-bottom: 1rem;">
+                <i class="bi bi-image text-white/30 fs-3"></i>
               </div>
-              <a class="btn btn-sm btn-outline-light rounded-pill" href="{% url 'travel:trip_detail' trip.id %}">Open</a>
+            {% endif %}
+            <h4 class="h6 text-white">{{ trip.title }}</h4>
+            <p class="small text-white/50 mb-2"><i class="bi bi-calendar3 me-1"></i>{{ trip.start_date }}</p>
+            <p class="small text-white/70 mb-3" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{{ trip.description }}</p>
+            <div class="mt-auto pt-2">
+              <a href="{% url 'travel:trip_detail' trip.id %}" class="btn btn-sm btn-outline-light w-100" style="border-radius: 8px;">View</a>
             </div>
           </div>
-          {% empty %}
-          <p class="text-secondary mb-0">No upcoming trips. Create one now.</p>
-          {% endfor %}
         </div>
-        <div class="glass-card p-4">
-          <h2 class="h5 mb-3">Recent Activities</h2>
-          {% for activity in recent_activities %}
-          <div class="d-flex justify-content-between border-bottom border-secondary-subtle py-2">
-            <div><strong>{{ activity.title }}</strong> <span class="small text-secondary">({{ activity.city_stop.city_name }})</span></div>
-            <span class="small text-secondary">{{ activity.activity_date }}</span>
-          </div>
-          {% empty %}
-          <p class="text-secondary mb-0">No activities yet.</p>
-          {% endfor %}
-        </div>
-      </div>
-      <div class="col-xl-4">
-        <div class="glass-card p-4 mb-4">
-          <h2 class="h6 mb-3">Quick Actions</h2>
-          <div class="d-grid gap-2">
-            <a href="{% url 'travel:trip_create' %}" class="btn btn-primary rounded-pill">Create New Trip</a>
-            <a href="{% url 'travel:city_search' %}" class="btn btn-outline-light rounded-pill">Find City Stops</a>
-            <a href="{% url 'travel:activity_search' %}" class="btn btn-outline-light rounded-pill">Find Activities</a>
+        {% empty %}
+        <div class="col-12">
+          <div class="glass-card p-4 d-flex align-items-center justify-content-center text-center" style="height: 200px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+            <span class="text-white/50">You don't have any previous trips yet. Start planning!</span>
           </div>
         </div>
-        <div class="glass-card p-4">
-          <h2 class="h6 mb-2">Recommended Destinations</h2>
-          <div class="d-flex flex-wrap gap-2">
-            {% for city in recommended_destinations %}
-            <span class="badge rounded-pill text-bg-dark border border-secondary-subtle">{{ city }}</span>
-            {% endfor %}
-          </div>
-        </div>
+        {% endfor %}
       </div>
     </div>
+
+    <!-- Recommended Destinations -->
+    <div class="mb-4">
+      <h3 class="h5 mb-3 text-white">Recommended Destinations</h3>
+      <div class="row g-3">
+        {% for dest in recommended_destinations %}
+        <div class="col-6 col-md-3">
+          <div class="glass-card overflow-hidden d-flex flex-column" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; height: 100%;">
+            <!-- Photo Section -->
+            <div class="position-relative overflow-hidden" style="height: 150px;">
+              <img src="{{ dest.image_url }}" alt="{{ dest.name }}" class="w-100 h-100" style="object-fit: cover;">
+            </div>
+            <!-- Details Section -->
+            <div class="p-3 d-flex flex-column flex-grow-1" style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px);">
+              <span class="text-white fw-bold fs-6 mb-2">{{ dest.name }}</span>
+              <div class="mt-auto d-flex flex-column gap-2">
+                <span class="text-success fw-bold small"><i class="bi bi-wallet2 me-1"></i>{{ dest.cost_index }}</span>
+                <a href="{{ dest.get_absolute_url }}" class="btn btn-outline-light btn-sm w-100" style="border-radius: 6px;">Explore</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <!-- Mock blocks if empty -->
+        {% for i in '1234' %}
+        <div class="col-6 col-md-3">
+          <div class="glass-card overflow-hidden d-flex flex-column" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; height: 100%;">
+            <!-- Photo Section -->
+            <div class="position-relative overflow-hidden" style="height: 150px;">
+              <img src="https://loremflickr.com/400/300/city?lock={{ i }}" alt="City {{ i }}" class="w-100 h-100" style="object-fit: cover;">
+            </div>
+            <!-- Details Section -->
+            <div class="p-3 d-flex flex-column flex-grow-1" style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px);">
+              <span class="text-white fw-bold fs-6 mb-2">Explore City {{ i }}</span>
+              <div class="mt-auto d-flex flex-column gap-2">
+                <span class="text-success fw-bold small"><i class="bi bi-wallet2 me-1"></i>Avg ₹{{ i }}5,000</span>
+                <a href="{% url 'travel:search' %}" class="btn btn-outline-light btn-sm w-100" style="border-radius: 6px;">Explore</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+    
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function updateUrlParam(key, value) {
+    let searchParams = new URLSearchParams(window.location.search);
+    if (value) {
+      searchParams.set(key, value);
+    } else {
+      searchParams.delete(key);
+    }
+    // Auto-scroll to previous trips to see the change
+    searchParams.set('scroll', 'trips');
+    window.location.search = searchParams.toString();
+  }
+
+  // Scroll if parameter is present
+  document.addEventListener('DOMContentLoaded', () => {
+    let searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('scroll') === 'trips') {
+      let el = document.getElementById('previous-trips-section');
+      if(el) { el.scrollIntoView({ behavior: 'smooth' }); }
+    }
+  });
+</script>
 {% endblock %}

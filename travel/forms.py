@@ -26,18 +26,7 @@ class StyledLoginForm(AuthenticationForm):
             "autofocus": True,
             "placeholder": "email@example.com"
         })
-# Replace the StyledLoginForm and SignUpForm classes
-
-class StyledLoginForm(AuthenticationForm):
-    def __init__(self, request=None, *args, **kwargs):
-        super().__init__(request=request, *args, **kwargs)
-        self.fields["username"].label = "Email"
-        self.fields["username"].widget.attrs.update({
-            "class": CTRL, 
-            "autofocus": True,
-            "placeholder": "email@example.com"
-        })
-        self.fields["password"].widget.attrs.update({"class": CTRL})
+        self.fields["password"].widget.attrs.update({"class": CTRL, "placeholder": "Enter your password"})
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -52,6 +41,11 @@ class SignUpForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({"class": CTRL})
+        self.fields["email"].widget.attrs.update({"placeholder": "email@example.com"})
+        self.fields["first_name"].widget.attrs.update({"placeholder": "Jane"})
+        self.fields["last_name"].widget.attrs.update({"placeholder": "Doe"})
+        self.fields["password1"].widget.attrs.update({"placeholder": "Create a secure password"})
+        self.fields["password2"].widget.attrs.update({"placeholder": "Confirm your password"})
 
     def clean_email(self):
         email = self.cleaned_data["email"].lower()
@@ -75,10 +69,10 @@ class TripForm(forms.ModelForm):
         model = Trip
         fields = ["title", "description", "start_date", "end_date", "cover_image", "is_public"]
         widgets = {
-            "description": forms.Textarea(attrs={"rows": 4, "class": CTRL}),
-            "start_date": forms.DateInput(attrs={"type": "date", "class": CTRL}),
-            "end_date": forms.DateInput(attrs={"type": "date", "class": CTRL}),
-            "title": forms.TextInput(attrs={"class": CTRL}),
+            "title": forms.TextInput(attrs={"class": CTRL, "placeholder": "e.g., Summer in Europe"}),
+            "description": forms.Textarea(attrs={"rows": 4, "class": CTRL, "placeholder": "Add any goals, ideas, or notes about this trip..."}),
+            "start_date": forms.DateInput(attrs={"type": "date", "class": CTRL, "placeholder": "YYYY-MM-DD"}),
+            "end_date": forms.DateInput(attrs={"type": "date", "class": CTRL, "placeholder": "YYYY-MM-DD"}),
             "cover_image": forms.ClearableFileInput(attrs={"class": CTRL}),
             "is_public": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
@@ -97,11 +91,11 @@ class CityStopForm(forms.ModelForm):
         model = CityStop
         fields = ["city_name", "country", "arrival_date", "departure_date", "order"]
         widgets = {
-            "city_name": forms.TextInput(attrs={"class": CTRL}),
-            "country": forms.TextInput(attrs={"class": CTRL}),
-            "arrival_date": forms.DateInput(attrs={"type": "date", "class": CTRL}),
-            "departure_date": forms.DateInput(attrs={"type": "date", "class": CTRL}),
-            "order": forms.NumberInput(attrs={"class": CTRL, "min": 1}),
+            "city_name": forms.TextInput(attrs={"class": CTRL, "placeholder": "e.g., Paris"}),
+            "country": forms.TextInput(attrs={"class": CTRL, "placeholder": "e.g., France"}),
+            "arrival_date": forms.DateInput(attrs={"type": "date", "class": CTRL, "placeholder": "YYYY-MM-DD"}),
+            "departure_date": forms.DateInput(attrs={"type": "date", "class": CTRL, "placeholder": "YYYY-MM-DD"}),
+            "order": forms.NumberInput(attrs={"class": CTRL, "min": 1, "placeholder": "e.g., 1"}),
         }
 
     def clean(self):
@@ -127,12 +121,12 @@ class ActivityForm(forms.ModelForm):
         ]
         widgets = {
             "city_stop": forms.Select(attrs={"class": CTRL}),
-            "title": forms.TextInput(attrs={"class": CTRL}),
+            "title": forms.TextInput(attrs={"class": CTRL, "placeholder": "e.g., Eiffel Tower Visit"}),
             "category": forms.Select(attrs={"class": CTRL}),
-            "description": forms.Textarea(attrs={"rows": 3, "class": CTRL}),
-            "cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0"}),
-            "duration_hours": forms.NumberInput(attrs={"class": CTRL, "step": "0.5", "min": "0"}),
-            "activity_date": forms.DateInput(attrs={"type": "date", "class": CTRL}),
+            "description": forms.Textarea(attrs={"rows": 3, "class": CTRL, "placeholder": "Reservation details, opening hours, etc."}),
+            "cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0", "placeholder": "e.g., 50.00"}),
+            "duration_hours": forms.NumberInput(attrs={"class": CTRL, "step": "0.5", "min": "0", "placeholder": "e.g., 2.5"}),
+            "activity_date": forms.DateInput(attrs={"type": "date", "class": CTRL, "placeholder": "YYYY-MM-DD"}),
         }
 
 
@@ -147,11 +141,11 @@ class BudgetForm(forms.ModelForm):
             "miscellaneous_cost",
         ]
         widgets = {
-            "transport_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0"}),
-            "hotel_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0"}),
-            "food_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0"}),
-            "activity_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0"}),
-            "miscellaneous_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0"}),
+            "transport_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0", "placeholder": "0.00"}),
+            "hotel_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0", "placeholder": "0.00"}),
+            "food_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0", "placeholder": "0.00"}),
+            "activity_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0", "placeholder": "0.00"}),
+            "miscellaneous_cost": forms.NumberInput(attrs={"class": CTRL, "step": "0.01", "min": "0", "placeholder": "0.00"}),
         }
 
 
@@ -160,7 +154,7 @@ class PackingItemForm(forms.ModelForm):
         model = PackingItem
         fields = ["item_name", "category"]
         widgets = {
-            "item_name": forms.TextInput(attrs={"class": CTRL}),
+            "item_name": forms.TextInput(attrs={"class": CTRL, "placeholder": "e.g., Passport"}),
             "category": forms.Select(attrs={"class": CTRL}),
         }
 
@@ -170,8 +164,8 @@ class NoteForm(forms.ModelForm):
         model = Note
         fields = ["title", "content"]
         widgets = {
-            "title": forms.TextInput(attrs={"class": CTRL}),
-            "content": forms.Textarea(attrs={"rows": 4, "class": CTRL}),
+            "title": forms.TextInput(attrs={"class": CTRL, "placeholder": "e.g., Flight Details"}),
+            "content": forms.Textarea(attrs={"rows": 4, "class": CTRL, "placeholder": "Enter your notes here..."}),
         }
 
 
@@ -182,20 +176,21 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ["avatar", "phone", "bio", "preferred_travel_style"]
+        fields = ["avatar", "phone", "bio", "preferred_travel_style", "language_preference"]
         widgets = {
-            "phone": forms.TextInput(attrs={"class": CTRL}),
-            "bio": forms.Textarea(attrs={"rows": 3, "class": CTRL}),
-            "preferred_travel_style": forms.TextInput(attrs={"class": CTRL}),
+            "phone": forms.TextInput(attrs={"class": CTRL, "placeholder": "+1 (555) 000-0000"}),
+            "bio": forms.Textarea(attrs={"rows": 3, "class": CTRL, "placeholder": "Tell us a bit about yourself and your travel style..."}),
+            "preferred_travel_style": forms.TextInput(attrs={"class": CTRL, "placeholder": "e.g., Backpacker, Luxury, Adventure"}),
             "avatar": forms.ClearableFileInput(attrs={"class": CTRL}),
+            "language_preference": forms.Select(attrs={"class": CTRL}),
         }
 
     def __init__(self, *args, user=None, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
-        self.fields["first_name"].widget.attrs.update({"class": CTRL})
-        self.fields["last_name"].widget.attrs.update({"class": CTRL})
-        self.fields["email"].widget.attrs.update({"class": CTRL})
+        self.fields["first_name"].widget.attrs.update({"class": CTRL, "placeholder": "Jane"})
+        self.fields["last_name"].widget.attrs.update({"class": CTRL, "placeholder": "Doe"})
+        self.fields["email"].widget.attrs.update({"class": CTRL, "placeholder": "email@example.com"})
         if user:
             self.fields["first_name"].initial = user.first_name
             self.fields["last_name"].initial = user.last_name
@@ -221,8 +216,8 @@ class ProfileForm(forms.ModelForm):
 
 class SearchForm(forms.Form):
     q = forms.CharField(required=False, label="Keyword")
-    start = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date", "class": CTRL}))
-    end = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date", "class": CTRL}))
+    start = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date", "class": CTRL, "placeholder": "YYYY-MM-DD"}))
+    end = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date", "class": CTRL, "placeholder": "YYYY-MM-DD"}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -237,3 +232,14 @@ class SearchForm(forms.Form):
         if start and start < timezone.localdate() - timedelta(days=3650):
             raise ValidationError("Start date looks invalid.")
         return cleaned
+
+from .models import Booking
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ["travel_date", "travelers_count"]
+        widgets = {
+            "travel_date": forms.DateInput(attrs={"type": "date", "class": CTRL, "placeholder": "YYYY-MM-DD"}),
+            "travelers_count": forms.NumberInput(attrs={"class": CTRL, "min": 1, "id": "id_travelers_count", "placeholder": "e.g., 2"}),
+        }

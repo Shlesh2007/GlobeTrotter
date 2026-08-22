@@ -1,35 +1,560 @@
 {% extends "base.html" %}
 
-{% block title %}Timeline View{% endblock %}
+{% block title %}Itinerary View{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<style>
+  .drag-handle { cursor: grab; padding: 0 10px; display: flex; align-items: center; color: rgba(255,255,255,0.5); font-size: 1.2rem; }
+  .activity-box { position: relative; }
+  .quick-edit-btn { position: absolute; top: 5px; right: 5px; background: transparent; border: none; color: #17a2b8; font-size: 0.9rem; cursor: pointer; }
+  .day-badge-col { cursor: pointer; user-select: none; }
+  .day-badge-col:hover { opacity: 0.8; }
+  .timeline-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
+  }
+  .toolbar .search-bar {
+    flex-grow: 1;
+  }
+  .itinerary-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .itinerary-header h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+  .column-headers {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 100px;
+    padding-right: 20px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+  }
+  .col-activity-header {
+    flex-grow: 1;
+    text-align: center;
+  }
+  .col-expense-header {
+    width: 200px;
+    text-align: center;
+  }
+  .day-section {
+    display: flex;
+    margin-bottom: 40px;
+  }
+  .day-badge-col {
+    width: 100px;
+    flex-shrink: 0;
+  }
+  .day-badge {
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    padding: 5px 15px;
+    display: inline-block;
+    font-weight: 500;
+  }
+  .activities-col {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 20px;
+  }
+  .expenses-col {
+    width: 200px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .activity-box {
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    padding: 15px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .expense-box {
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 0;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .arrow-down {
+    text-align: center;
+    padding: 10px 0;
+    font-size: 1.2rem;
+    color: currentColor;
+    line-height: 1;
+  }
+  /* Empty box placeholder if no expense */
+  .expense-box:empty::after {
+    content: '-';
+    opacity: 0.5;
+  }
+  
+  /* Flex row for alignment */
+  .activity-row-wrapper {
+    display: flex;
+    width: 100%;
+    margin-bottom: 0;
+  }
+  
+  .activity-part {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 20px;
+  }
+  
+  .expense-part {
+    width: 200px;
+    flex-shrink: 0;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="py-4">
-  <h1 class="h4 mb-3">Itinerary Timeline · {{ trip.title }}</h1>
-  <div class="glass-card p-4 mb-3">
-    <h2 class="h6">City-wise grouping</h2>
-    {% for stop in city_stops %}
-      <div class="trip-row p-3 rounded-3 mb-2">
-        <strong>{{ stop.city_name }}, {{ stop.country }}</strong>
-        <div class="small text-secondary">{{ stop.arrival_date }} to {{ stop.departure_date }}</div>
+  <div class="glass-card p-4 timeline-container">
+    
+    <!-- Toolbar -->
+    <div class="toolbar flex-wrap">
+      <div class="search-bar">
+        <input type="text" id="searchInput" class="form-control bg-transparent text-white" placeholder="Search activities..." style="border-radius: 20px;">
       </div>
-    {% empty %}
-      <p class="text-secondary">No city stops yet.</p>
-    {% endfor %}
-  </div>
-  <div class="glass-card p-4">
-    <h2 class="h6">Day-wise grouping</h2>
-    {% for day, activities in day_map.items %}
-      <div class="mb-3">
-        <h3 class="h6">{{ day }}</h3>
-        {% for activity in activities %}
-          <div class="trip-row p-2 rounded-3 mb-1">
-            {{ activity.title }} - {{ activity.city_stop.city_name }} ({{ activity.duration_hours }}h)
+      <div class="btn-group" role="group">
+        <button type="button" id="btnList" class="btn btn-outline-light active" style="border-radius: 20px 0 0 20px;">List View</button>
+        <button type="button" id="btnCalendar" class="btn btn-outline-light" style="border-radius: 0;">Calendar</button>
+        <button type="button" id="btnCity" class="btn btn-outline-light" style="border-radius: 0 20px 20px 0;">By City</button>
+      </div>
+      <select id="filterSelect" class="btn btn-outline-light text-start" style="border-radius: 20px;">
+        <option value="all" class="text-dark">Filter: All</option>
+        <option value="has_expense" class="text-dark">Has Expense</option>
+        <option value="free" class="text-dark">Free</option>
+      </select>
+      <select id="sortSelect" class="btn btn-outline-light text-start" style="border-radius: 20px;">
+        <option value="default" class="text-dark">Sort: Default</option>
+        <option value="expense_desc" class="text-dark">Expense (High to Low)</option>
+        <option value="expense_asc" class="text-dark">Expense (Low to High)</option>
+      </select>
+    </div>
+
+    <!-- Header -->
+    <div class="itinerary-header">
+      <h2>Itinerary for a selected place</h2>
+      <p class="text-success fw-bold mt-2 mb-0">Budget of this section: ₹{{ total_activities_cost }}</p>
+    </div>
+
+    <!-- Timeline Items (Timeline View) -->
+    <div id="timelineView">
+      <div class="column-headers">
+        <div class="col-activity-header">Physical Activity</div>
+        <div class="col-expense-header">Expense</div>
+      </div>
+      {% for day, activities in day_map.items %}
+        <div class="day-section">
+          <div class="day-badge-col" title="Click to collapse/expand">
+            <div class="day-badge">Day {{ forloop.counter }}</div>
+          </div>
+          
+          <div class="w-100 day-activities-container" data-date="{{ day|date:'Y-m-d' }}">
+            {% for activity in activities %}
+              <div class="activity-row-wrapper sortable-item" data-id="{{ activity.id }}" data-title="{{ activity.title|lower }}" data-desc="{{ activity.description|lower|default:'' }}" data-city="{{ activity.city_stop.city_name|lower }}" data-expense="{% if activity.cost %}{{ activity.cost }}{% else %}0{% endif %}">
+                <div class="activity-part">
+                  <div class="activity-box glass-card flex-column">
+                    <button class="quick-edit-btn" onclick="openQuickEdit({{ activity.id }}, '{{ activity.title|escapejs }}', '{{ activity.cost|default:'' }}', '{{ activity.duration_hours }}', '{{ activity.description|escapejs }}', '{{ activity.activity_date|date:"Y-m-d" }}')" title="Quick Edit"><i class="bi bi-pencil"></i> Edit</button>
+                    <div class="d-flex w-100">
+                      <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
+                      <div class="flex-grow-1">
+                        <div>
+                          <strong>{{ activity.title }}</strong> 
+                          <span class="text-white/50 ms-2">({{ activity.duration_hours }} hrs)</span>
+                        </div>
+                        <div class="small text-info mt-1">{{ activity.city_stop.city_name }}</div>
+                        {% if activity.description %}<small class="text-secondary mt-1">{{ activity.description }}</small>{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="arrow-down arrow-down-activity">↓</div>
+                </div>
+                
+                <div class="expense-part">
+                  <div class="expense-box glass-card">
+                    {% if activity.cost %}
+                      ₹{{ activity.cost }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </div>
+                  <div class="arrow-down arrow-down-expense" style="visibility: hidden;">↓</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-center text-secondary">No itinerary items found. Add some activities to see the timeline.</p>
+      {% endfor %}
+    </div>
+
+    <!-- City Items (By City View, hidden by default) -->
+    <div id="cityView" style="display: none;">
+      <div class="column-headers" style="padding-left: 0;">
+        <div class="col-activity-header">Physical Activity</div>
+        <div class="col-expense-header">Expense</div>
+      </div>
+      {% for stop in city_stops %}
+        <div class="mb-4">
+          <h3 class="h5 text-info mb-3">{{ stop.city_name }}, {{ stop.country }}</h3>
+          
+          {% for activity in stop.activities.all %}
+            <div class="activity-row-wrapper mb-3" data-title="{{ activity.title|lower }}" data-desc="{{ activity.description|lower|default:'' }}" data-city="{{ stop.city_name|lower }}" data-expense="{% if activity.cost %}{{ activity.cost }}{% else %}0{% endif %}">
+              <div class="activity-part">
+                <div class="activity-box glass-card flex-column">
+                  <div>
+                    <strong>{{ activity.title }}</strong> 
+                    <span class="text-white/50 ms-2">({{ activity.duration_hours }} hrs)</span>
+                  </div>
+                  <div class="small text-warning mt-1">{{ activity.activity_date|date:"D, M d, Y" }}</div>
+                  {% if activity.description %}<small class="text-secondary mt-1">{{ activity.description }}</small>{% endif %}
+                </div>
+              </div>
+              
+              <div class="expense-part">
+                <div class="expense-box glass-card">
+                  {% if activity.cost %}
+                    ₹{{ activity.cost }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <p class="text-center text-secondary">No activities in this city.</p>
+          {% endfor %}
+        </div>
+      {% empty %}
+        <p class="text-center text-secondary">No cities found.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Calendar View (Hidden by default) -->
+    <div id="calendarViewGrid" style="display: none;" class="mt-4">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for day, activities in day_map.items %}
+          <div class="col">
+            <div class="card bg-transparent border-light h-100 glass-card">
+              <div class="card-header border-light text-center py-3">
+                <h5 class="mb-1 text-white">Day {{ forloop.counter }}</h5>
+                <small class="text-white-50">{{ day|date:"D, M d, Y" }}</small>
+              </div>
+              <div class="card-body p-3">
+                {% for activity in activities %}
+                  <div class="calendar-activity-item mb-3 p-2 rounded" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);" data-title="{{ activity.title|lower }}" data-desc="{{ activity.description|lower|default:'' }}" data-city="{{ activity.city_stop.city_name|lower }}" data-expense="{% if activity.cost %}{{ activity.cost }}{% else %}0{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                      <strong class="text-white">{{ activity.title }}</strong>
+                      <span class="badge bg-info bg-opacity-25 text-info border border-info">{{ activity.duration_hours }}h</span>
+                    </div>
+                    <div class="small text-white-50 mb-1">
+                      <i class="bi bi-geo-alt"></i> {{ activity.city_stop.city_name }}
+                    </div>
+                    {% if activity.cost %}
+                      <div class="small text-success fw-bold">₹{{ activity.cost }}</div>
+                    {% else %}
+                      <div class="small text-secondary">Free</div>
+                    {% endif %}
+                  </div>
+                {% empty %}
+                   <p class="text-center text-muted small mt-2">No activities planned.</p>
+                {% endfor %}
+              </div>
+            </div>
           </div>
         {% endfor %}
       </div>
-    {% empty %}
-      <p class="text-secondary mb-0">No activities yet.</p>
-    {% endfor %}
+    </div>
+
   </div>
 </section>
+
+<!-- Quick Edit Modal -->
+<div class="modal fade" id="quickEditModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-card border border-white/20">
+      <div class="modal-header border-white/10">
+        <h5 class="modal-title text-white">Quick Edit Activity</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="quickEditForm" method="post">
+        {% csrf_token %}
+        <div class="modal-body text-white text-start">
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" id="qe_title" class="form-control auth-input text-white bg-transparent" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cost (₹)</label>
+            <input type="number" name="cost" id="qe_cost" class="form-control auth-input text-white bg-transparent" step="0.01">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Duration (hrs)</label>
+            <input type="number" name="duration_hours" id="qe_duration" class="form-control auth-input text-white bg-transparent" step="0.01">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="activity_date" id="qe_date" class="form-control auth-input text-white bg-transparent" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" id="qe_description" class="form-control auth-input text-white bg-transparent" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-white/10">
+          <button type="submit" class="btn btn-primary rounded-pill w-100">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openQuickEdit(id, title, cost, duration, desc, actDate) {
+    const modal = new bootstrap.Modal(document.getElementById('quickEditModal'));
+    const form = document.getElementById('quickEditForm');
+    form.action = `/activity/${id}/quick-edit/`;
+    document.getElementById('qe_title').value = title;
+    document.getElementById('qe_cost').value = cost;
+    document.getElementById('qe_duration').value = duration;
+    document.getElementById('qe_description').value = desc;
+    if (actDate) {
+        // Format should be YYYY-MM-DD
+        document.getElementById('qe_date').value = actDate;
+    }
+    modal.show();
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    
+    // Expand / Collapse Day
+    document.querySelectorAll('.day-badge-col').forEach(col => {
+      col.addEventListener('click', function() {
+        const container = this.nextElementSibling;
+        if (container.style.display === 'none') {
+          container.style.display = 'block';
+          this.style.opacity = '1';
+        } else {
+          container.style.display = 'none';
+          this.style.opacity = '0.5';
+        }
+      });
+    });
+
+    // Initialize Sortable for drag-and-drop
+    document.querySelectorAll('.day-activities-container').forEach(container => {
+      if (typeof Sortable !== 'undefined') {
+        new Sortable(container, {
+          group: 'shared', // set both lists to same group
+          handle: '.drag-handle',
+          animation: 150,
+          onEnd: function (evt) {
+            const itemEl = evt.item;
+            const toList = evt.to;
+            const newDate = toList.getAttribute('data-date');
+            const activityId = itemEl.getAttribute('data-id');
+            
+            if(newDate && activityId) {
+              const formData = new FormData();
+              formData.append('new_date', newDate);
+              const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+              if (csrfInput) {
+                  formData.append('csrfmiddlewaretoken', csrfInput.value);
+              }
+              
+              fetch(`/activity/${activityId}/update-date/`, {
+                method: 'POST',
+                body: formData
+              }).then(response => response.json())
+                .then(data => {
+                  if(data.status === 'success') {
+                    console.log('Date updated successfully');
+                  }
+                });
+            }
+            
+            // Re-apply filters to hide empty days
+            applyFilterAndSort();
+          }
+        });
+      }
+    });
+
+    const btnList = document.getElementById("btnList");
+    const btnCalendar = document.getElementById("btnCalendar");
+    const btnCity = document.getElementById("btnCity");
+    const timelineView = document.getElementById("timelineView");
+    const calendarViewGrid = document.getElementById("calendarViewGrid");
+    const cityView = document.getElementById("cityView");
+
+    const searchInput = document.getElementById("searchInput");
+    const filterSelect = document.getElementById("filterSelect");
+    const sortSelect = document.getElementById("sortSelect");
+
+    function setView(view) {
+      btnList.classList.remove("active");
+      btnCalendar.classList.remove("active");
+      btnCity.classList.remove("active");
+      timelineView.style.display = "none";
+      calendarViewGrid.style.display = "none";
+      cityView.style.display = "none";
+
+      if (view === 'list') {
+        btnList.classList.add("active");
+        timelineView.style.display = "block";
+      } else if (view === 'calendar') {
+        btnCalendar.classList.add("active");
+        calendarViewGrid.style.display = "block";
+      } else if (view === 'city') {
+        btnCity.classList.add("active");
+        cityView.style.display = "block";
+      }
+    }
+
+    btnList.addEventListener("click", () => setView('list'));
+    btnCalendar.addEventListener("click", () => setView('calendar'));
+    btnCity.addEventListener("click", () => setView('city'));
+
+    function applyFilterAndSort() {
+      const query = searchInput.value.toLowerCase().trim();
+      const filter = filterSelect.value;
+      const sortBy = sortSelect.value;
+
+      // Select all container blocks (Days or Cities or Calendar Days)
+      const containers = document.querySelectorAll('.day-section .day-activities-container, #cityView .mb-4, #calendarViewGrid .card-body');
+      
+      containers.forEach(container => {
+        const wrappers = Array.from(container.querySelectorAll('.activity-row-wrapper, .calendar-activity-item'));
+        
+        let visibleCount = 0;
+        
+        wrappers.forEach(wrapper => {
+          const title = wrapper.dataset.title || "";
+          const desc = wrapper.dataset.desc || "";
+          const city = wrapper.dataset.city || "";
+          const expense = parseFloat(wrapper.dataset.expense || 0);
+
+          let matchesSearch = title.includes(query) || desc.includes(query) || city.includes(query);
+          
+          let matchesFilter = true;
+          if (filter === 'has_expense') {
+            matchesFilter = expense > 0;
+          } else if (filter === 'free') {
+            matchesFilter = expense === 0;
+          }
+
+          if (matchesSearch && matchesFilter) {
+            if (wrapper.classList.contains('calendar-activity-item')) {
+              wrapper.style.display = 'block';
+            } else {
+              wrapper.style.display = 'flex'; // activity-row-wrapper uses display: flex usually
+            }
+            visibleCount++;
+          } else {
+            wrapper.style.display = 'none';
+          }
+        });
+        
+        const visibleWrappers = wrappers.filter(w => w.style.display !== 'none');
+        
+        // Let's store original index if not already present
+        wrappers.forEach((w, i) => {
+          if (!w.hasAttribute('data-index')) {
+            w.setAttribute('data-index', i);
+          }
+        });
+
+        visibleWrappers.sort((a, b) => {
+          if (sortBy === 'default') {
+            return parseInt(a.dataset.index) - parseInt(b.dataset.index);
+          } else {
+            const expA = parseFloat(a.dataset.expense);
+            const expB = parseFloat(b.dataset.expense);
+            if (sortBy === 'expense_desc') {
+              return expB - expA;
+            } else if (sortBy === 'expense_asc') {
+              return expA - expB;
+            }
+          }
+          return 0;
+        });
+
+        // Re-append sorted elements
+        visibleWrappers.forEach(w => container.appendChild(w));
+
+        // Fix arrows for timeline view (only visible inside `.w-100`)
+        if (container.classList.contains('w-100')) {
+          visibleWrappers.forEach((w, index) => {
+            const arrowAct = w.querySelector('.arrow-down-activity');
+            const arrowExp = w.querySelector('.arrow-down-expense');
+            if (arrowAct) {
+              if (index === visibleWrappers.length - 1) {
+                arrowAct.style.visibility = 'hidden';
+                if (arrowExp) arrowExp.style.visibility = 'hidden';
+              } else {
+                arrowAct.style.visibility = 'visible';
+                if (arrowExp) arrowExp.style.visibility = 'hidden'; // Space maintainer
+              }
+            }
+          });
+          
+          // Hide day section entirely if empty
+          const daySection = container.closest('.day-section');
+          if (daySection) {
+            daySection.style.display = visibleCount > 0 ? 'flex' : 'none';
+          }
+        } else {
+           // For city view
+           if (visibleCount === 0) {
+              // Hide the h3 too if no activities match in this city
+              const h3 = container.querySelector('h3');
+              if (h3) h3.style.display = 'none';
+           } else {
+              const h3 = container.querySelector('h3');
+              if (h3) h3.style.display = 'block';
+           }
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', applyFilterAndSort);
+    filterSelect.addEventListener('change', applyFilterAndSort);
+    sortSelect.addEventListener('change', applyFilterAndSort);
+    
+    // Initial call to set arrows
+    applyFilterAndSort();
+  });
+</script>
 {% endblock %}

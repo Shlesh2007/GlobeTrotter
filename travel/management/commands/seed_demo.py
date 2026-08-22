@@ -54,7 +54,7 @@ class Command(BaseCommand):
                     "Perfect for honeymooners and slow travelers."
                 ),
                 "image_url": (
-                    "https://images.unsplash.com/photo-1613395877344-e13ddee88bdc?auto=format&fit=crop&w=1400&q=80"
+                    "https://images.unsplash.com/photo-1613395877344-13c474d42728?auto=format&fit=crop&w=1400&q=80"
                 ),
                 "featured": True,
                 "slug": "santorini-greece",

@@ -1,47 +1,82 @@
 {% extends "base.html" %}
 
-{% block title %}Login · Traveloop{% endblock %}
+{% block title %}Login · GlobeTrotter{% endblock %}
 
 {% block content %}
-<section class="auth-wrap py-5">
+<section class="auth-wrap py-5 d-flex align-items-center" style="min-height: 85vh;">
   <div class="container py-5">
     <div class="row justify-content-center">
-      <div class="col-md-7 col-lg-5">
-        <div class="glass-card p-4 p-lg-5">
-          <div class="text-center mb-4">
-            <span class="brand-badge fs-4"><i class="bi bi-person-lock"></i></span>
-            <h1 class="h3 mt-3 mb-1">Welcome back</h1>
-            <p class="text-secondary mb-0">Login to continue planning your trips.</p>
+      <div class="col-md-6 col-lg-4 position-relative">
+        <!-- Wireframe Inner Box with Premium Styling -->
+        <div class="p-4 p-lg-5 auth-box mt-4 position-relative">
+          
+          <div class="text-center mb-5">
+            <!-- Circular Photo Avatar -->
+            <div class="mx-auto d-flex align-items-center justify-content-center text-white auth-avatar position-absolute top-0 start-50 translate-middle" style="width: 80px; height: 80px; border-radius: 50%; font-size: 2rem; z-index: 10;">
+              <i class="bi bi-person-lock"></i>
+            </div>
           </div>
-          <form method="post" action="{% url 'login' %}">
+
+          <form method="post" action="{% url 'login' %}" class="mt-4">
             {% csrf_token %}
             {% if request.GET.next %}
             <input type="hidden" name="next" value="{{ request.GET.next }}">
             {% endif %}
-           <div class="mb-3">
-  <label class="form-label">Email</label>
-  {{ form.username }}
-  {% if form.username.errors %}
-  <div class="small text-danger mt-1">{{ form.username.errors }}</div>
-  {% endif %}
-</div>
-            <div class="mb-3">
-              <label class="form-label">Password</label>
-              {{ form.password }}
+
+            <!-- Username / Email -->
+            <div class="mb-4">
+              <input type="text" name="username" class="form-control auth-input shadow-none" placeholder="Username" required>
+              {% if form.username.errors %}
+              <div class="small text-danger mt-1">{{ form.username.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+              <div class="position-relative w-100">
+                <input type="password" name="password" id="loginPassword" class="form-control auth-input shadow-none pe-5" placeholder="Password" required>
+                <i class="bi bi-eye position-absolute" 
+                   onclick="togglePassword('loginPassword', this)" 
+                   style="right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(255,255,255,0.7); z-index: 10;"></i>
+              </div>
               {% if form.password.errors %}<div class="small text-danger mt-1">{{ form.password.errors }}</div>{% endif %}
             </div>
+
             {% if form.non_field_errors %}
             <div class="alert alert-danger">{{ form.non_field_errors }}</div>
             {% endif %}
-            <button class="btn btn-primary w-100 rounded-pill py-2">Login</button>
+
+            <!-- Login Button -->
+            <div class="text-center mt-5 d-flex gap-3 justify-content-center flex-wrap">
+              <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold">Login</button>
+              <a href="{% url 'admin:index' %}" class="btn btn-outline-light rounded-pill px-5 py-2 fw-semibold">Admin Login</a>
+            </div>
           </form>
-          <div class="d-flex justify-content-between mt-3 small">
-            <a href="{% url 'password_reset' %}" class="text-info text-decoration-none">Forgot password?</a>
-            <a href="{% url 'signup' %}" class="text-info text-decoration-none">Create account</a>
+
+          <div class="d-flex justify-content-between mt-4 small">
+            <a href="{% url 'password_reset' %}" class="text-white/50 text-decoration-none hover:text-white">Forgot password?</a>
+            <a href="{% url 'signup' %}" class="text-white/50 text-decoration-none hover:text-white">Signup</a>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('bi-eye');
+      icon.classList.add('bi-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('bi-eye-slash');
+      icon.classList.add('bi-eye');
+    }
+  }
+</script>
 {% endblock %}

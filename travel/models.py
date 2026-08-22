@@ -11,6 +11,17 @@ from django.urls import reverse
 class UserProfile(models.Model):
     """Optional user profile details shown on the profile screen."""
 
+    LANGUAGE_CHOICES = [
+        ('en', 'English'),
+        ('es', 'Spanish'),
+        ('fr', 'French'),
+        ('de', 'German'),
+        ('it', 'Italian'),
+        ('pt', 'Portuguese'),
+        ('zh', 'Chinese'),
+        ('ja', 'Japanese'),
+    ]
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -20,6 +31,8 @@ class UserProfile(models.Model):
     phone = models.CharField(max_length=20, blank=True)
     bio = models.TextField(blank=True)
     preferred_travel_style = models.CharField(max_length=80, blank=True)
+    language_preference = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')
+    saved_destinations = models.ManyToManyField('Destination', blank=True, related_name='saved_by_users')
 
     def __str__(self):
         return f"Profile: {self.user.username}"
@@ -75,6 +88,10 @@ class CityStop(models.Model):
 
     def __str__(self):
         return f"{self.city_name}, {self.country}"
+
+    @property
+    def total_budget(self):
+        return sum(activity.cost for activity in self.activities.all())
 
 
 class Activity(models.Model):
@@ -179,6 +196,19 @@ class Destination(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def cost_index(self):
+        idx = len(self.name) % 3
+        return ["$$ (Moderate)", "$$$ (Expensive)", "$ (Budget-Friendly)"][idx]
+
+    @property
+    def popularity(self):
+        return 80 + (len(self.name) * 2 % 20)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("travel:destination_detail", kwargs={"slug": self.slug})
 
 class Package(models.Model):
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name="packages")

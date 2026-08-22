@@ -7,7 +7,13 @@ app_name = "travel"
 urlpatterns = [
     path("", views.home, name="home"),
     path("destinations/", views.destination_list, name="destination_list"),
+    path("destinations/<slug:slug>/", views.destination_detail, name="destination_detail"),
     path("packages/", views.package_list, name="package_list"),
+    path("packages/<int:pk>/book/", views.package_book, name="package_book"),
+    path("search/", views.search, name="search"),
+    path("about/", views.about, name="about"),
+    path("contact/", views.contact, name="contact"),
+    path("newsletter-subscribe/", views.newsletter_subscribe, name="newsletter_subscribe"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("trips/create/", views.trip_create, name="trip_create"),
     path("trips/", views.trip_list, name="my_trips"),
@@ -23,6 +29,7 @@ urlpatterns = [
     path("trips/<int:trip_id>/timeline/", views.itinerary_timeline, name="itinerary_timeline"),
     path("city-search/", views.city_search, name="city_search"),
     path("activity-search/", views.activity_search, name="activity_search"),
+    path("activity/<int:activity_id>/delete/", views.activity_delete, name="activity_delete"),
     path("trips/<int:trip_id>/budget/", views.budget_breakdown, name="budget_breakdown"),
     path("trips/<int:trip_id>/packing/", views.packing_checklist, name="packing_checklist"),
     path(
@@ -43,5 +50,11 @@ urlpatterns = [
         name="note_delete",
     ),
     path("profile/", views.profile_page, name="profile"),
+    path("profile/delete/", views.delete_account, name="delete_account"),
+    path("destinations/<slug:slug>/save/", views.toggle_save_destination, name="toggle_save_destination"),
     path("share/<uuid:slug>/", views.public_itinerary, name="public_itinerary"),
+    path("admin-dashboard/", views.analytics_dashboard, name="analytics_dashboard"),
+    path("activity/<int:activity_id>/update-date/", views.activity_update_date, name="activity_update_date"),
+    path("activity/<int:activity_id>/quick-edit/", views.activity_quick_edit, name="activity_quick_edit"),
+    path("debug/", views.debug_db),
 ]

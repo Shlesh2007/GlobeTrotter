@@ -76,6 +76,6 @@ class NoteAdmin(admin.ModelAdmin):
 
 
 # Friendly admin branding
-admin.site.site_header = "Traveloop Admin"
-admin.site.site_title = "Traveloop"
+admin.site.site_header = "GlobeTrotter Admin"
+admin.site.site_title = "GlobeTrotter"
 admin.site.index_title = "Manage planners, itinerary data, and users"

@@ -24,9 +24,41 @@
     <div class="col-xl-8">
       <div class="glass-card p-4 mb-3">
         <div class="row g-3">
-          <div class="col-md-6"><div class="trip-row p-3 rounded-3"><small class="text-secondary">Total Estimated Cost</small><h3 class="mb-0">${{ total }}</h3></div></div>
-          <div class="col-md-6"><div class="trip-row p-3 rounded-3"><small class="text-secondary">Average Daily Cost</small><h3 class="mb-0">${{ avg_daily|floatformat:2 }}</h3></div></div>
+          <div class="col-md-6"><div class="trip-row p-3 rounded-3"><small class="text-secondary">Total Estimated Cost</small><h3 class="mb-0">₹{{ total|floatformat:2 }}</h3></div></div>
+          <div class="col-md-6"><div class="trip-row p-3 rounded-3"><small class="text-secondary">Average Daily Cost</small><h3 class="mb-0">₹{{ avg_daily|floatformat:2 }}</h3></div></div>
+          <div class="col-md-6"><div class="trip-row p-3 rounded-3"><small class="text-secondary">Total Actual Expenses</small><h3 class="mb-0 text-info">₹{{ total_actual_expenses|floatformat:2 }}</h3></div></div>
+          <div class="col-md-6">
+            <div class="trip-row p-3 rounded-3">
+              {% if remaining_budget < 0 %}
+                <small class="text-secondary">Over Budget By</small>
+                <h3 class="mb-0 text-danger">₹{{ remaining_budget|stringformat:"f"|cut:"-"|floatformat:2 }}</h3>
+              {% else %}
+                <small class="text-secondary">Remaining Budget</small>
+                <h3 class="mb-0 text-success">₹{{ remaining_budget|floatformat:2 }}</h3>
+              {% endif %}
+            </div>
+          </div>
         </div>
+
+        {% if overbudget_days %}
+        <div class="mt-4">
+          <h4 class="h6 text-danger mb-3"><i class="bi bi-exclamation-triangle"></i> Alerts: Overbudget Days</h4>
+          <div class="d-flex flex-column gap-2">
+            {% for ob_day in overbudget_days %}
+            <div class="alert alert-danger border-danger border-opacity-25 bg-danger bg-opacity-10 text-danger p-3 mb-0 rounded-3 d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ ob_day.date|date:"D, M d, Y" }}</strong>
+                <br>
+                <small>Actual expenses: ₹{{ ob_day.cost|floatformat:2 }}</small>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-danger">Over by ₹{{ ob_day.over_amount|floatformat:2 }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
       </div>
       <div class="glass-card p-4">
         <div class="row g-4">
@@ -40,9 +72,9 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/budget.js' %}"></script>
 {{ chart_data|json_script:"budget-data" }}
 <script>
   window.traveloopBudgetData = JSON.parse(document.getElementById("budget-data").textContent);
 </script>
+<script src="{% static 'js/budget.js' %}?v=2"></script>
 {% endblock %}

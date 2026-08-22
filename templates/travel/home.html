@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Welcome to GlobeTrotter{% endblock %}
+{% block favicon %}🏠{% endblock %}
 
 {% block content %}
 <!-- HERO -->
@@ -137,7 +138,7 @@
           <h3 class="h5 font-display fw-semibold text-white">{{ pkg.name }}</h3>
           <p class="small text-white/65 flex-grow-1">{{ pkg.headline }}</p>
           <div class="d-flex justify-content-between align-items-center mt-3">
-            <span class="text-sky-200 fw-bold">${{ pkg.price_per_person }} <small class="fw-normal text-white/55">/ person</small></span>
+            <span class="text-sky-200 fw-bold">₹{{ pkg.price_per_person }} <small class="fw-normal text-white/55">/ person</small></span>
             {% if user.is_authenticated %}
             <a href="{% url 'travel:package_book' pkg.id %}" class="btn btn-sm btn-light rounded-pill px-3">Book now</a>
             {% else %}
@@ -159,9 +160,8 @@
   <div class="container position-relative">
     <div class="text-center mb-5">
       <h2 class="display-6 font-display text-white fw-bold">Traveler love letters</h2>
-      <p class="text-white/65">Powered by Bootstrap 5 carousel + bespoke gradient cards.</p>
     </div>
-    <div id="testimonialCarousel" class="carousel slide carousel-fade mx-auto" data-bs-ride="carousel" style="max-width:900px;">
+    <div id="testimonialCarousel" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width:900px;">
       <div class="carousel-inner rounded-4 glass-panel p-4 p-md-5">
         {% for t in testimonials %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">

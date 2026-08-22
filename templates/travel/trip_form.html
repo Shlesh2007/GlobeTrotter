@@ -4,26 +4,176 @@
 
 {% block content %}
 <section class="py-4">
-  <div class="glass-card p-4 p-lg-5">
-    <h1 class="h4 mb-4">{{ page_title }}</h1>
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="row g-3">
-        <div class="col-md-6"><label class="form-label">Title</label>{{ form.title }}</div>
-        <div class="col-md-3"><label class="form-label">Start date</label>{{ form.start_date }}</div>
-        <div class="col-md-3"><label class="form-label">End date</label>{{ form.end_date }}</div>
-        <div class="col-12"><label class="form-label">Description</label>{{ form.description }}</div>
-        <div class="col-md-6"><label class="form-label">Cover image</label>{{ form.cover_image }}</div>
-        <div class="col-md-6 d-flex align-items-center pt-4">
-          <div class="form-check">{{ form.is_public }} <label class="form-check-label ms-2">Enable public sharing</label></div>
+  <div class="container-fluid p-lg-4" style="max-width: 900px;">
+    
+    <div class="glass-card mb-4 p-4" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+      <h2 class="h5 mb-4 text-white">Plan a new trip</h2>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="d-flex flex-column gap-3 mb-4" style="max-width: 400px;">
+          
+          <!-- Title (Mapped from 'Select a Place') -->
+          <div class="d-flex align-items-center">
+            <label class="text-white mb-0 me-3" style="width: 120px;">Trip Name:</label>
+            {{ form.title }}
+          </div>
+          
+          <!-- Start Date -->
+          <div class="d-flex align-items-center">
+            <label class="text-white mb-0 me-3" style="width: 120px;">Start Date:</label>
+            <div class="flex-grow-1 date-input-wrapper">
+              {{ form.start_date }}
+            </div>
+          </div>
+
+          <!-- End Date -->
+          <div class="d-flex align-items-center">
+            <label class="text-white mb-0 me-3" style="width: 120px;">End Date:</label>
+            <div class="flex-grow-1 date-input-wrapper">
+              {{ form.end_date }}
+            </div>
+          </div>
+          
+        </div>
+
+        <style>
+          /* Make the HTML5 date picker calendar icon white so it's visible on dark backgrounds */
+          .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+              filter: invert(1);
+              cursor: pointer;
+          }
+          /* Ensure standard checkboxes are clearly visible on dark background and appear instantly */
+          .form-check-input {
+              background-color: rgba(0,0,0,0.3) !important;
+              border: 1px solid rgba(255,255,255,0.4) !important;
+              transition: none !important;
+          }
+          .form-check-input:checked {
+              background-color: #0ea5e9 !important;
+              border-color: #0ea5e9 !important;
+              background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
+              background-size: 100% 100% !important;
+              transition: none !important;
+          }
+        </style>
+
+        <input type="hidden" name="suggested_cover_url" id="id_suggested_cover_url">
+        <!-- Restored fields to preserve functionality -->
+        <div class="mb-4 pt-4 mt-2" style="border-top: 1px solid rgba(255,255,255,0.1);">
+          <h4 class="h6 text-white mb-3">Additional Details</h4>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="text-white mb-1">Description:</label>
+              {{ form.description }}
+            </div>
+            <div class="col-md-8">
+              <label class="text-white mb-1">Cover Image:</label>
+              {{ form.cover_image }}
+              <div id="suggested_image_preview" class="mt-2 text-info small" style="display: none;">
+                ✓ Using suggested cover image. Leave file upload blank to keep it.
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <div class="form-check mb-2 d-flex align-items-center">
+                {{ form.is_public }}
+                <label for="id_is_public" class="form-check-label text-white ms-2" style="cursor: pointer; padding-top: 2px;">Public Share</label>
+              </div>
+            </div>
+          </div>
+          {% if form.non_field_errors %}<div class="text-danger small mt-2">{{ form.non_field_errors }}</div>{% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-outline-light px-4 py-2" style="border-radius: 8px;">Save Trip</button>
+      </form>
+    </div>
+
+    <!-- Suggestion grid matching the 3x2 wireframe layout -->
+    <div class="glass-card p-4" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">
+      <h3 class="h6 mb-4 text-white">Suggestion for Places to Visit/Activities to preform</h3>
+      <div class="row g-4">
+        <div class="col-6 col-md-4">
+          <div class="overflow-hidden position-relative d-flex align-items-end p-2 suggestion-card" onclick="useSuggestion('Explore Paris', 'A wonderful trip to explore Paris, France. Visiting the Eiffel Tower, Louvre, and more.', 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=600')" style="aspect-ratio: 1/1; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: url('https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=600') center/cover; cursor: pointer;">
+            <span class="badge bg-dark/80 text-white w-100 text-center shadow-sm">Explore Paris</span>
+          </div>
+        </div>
+        <div class="col-6 col-md-4">
+          <div class="overflow-hidden position-relative d-flex align-items-end p-2 suggestion-card" onclick="useSuggestion('Visit Tokyo', 'A week in Tokyo exploring the bustling city life, ancient temples, and amazing food.', 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=600')" style="aspect-ratio: 1/1; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=600') center/cover; cursor: pointer;">
+            <span class="badge bg-dark/80 text-white w-100 text-center shadow-sm">Visit Tokyo</span>
+          </div>
+        </div>
+        <div class="col-6 col-md-4">
+          <div class="overflow-hidden position-relative d-flex align-items-end p-2 suggestion-card" onclick="useSuggestion('Relax in Bali', 'A peaceful getaway in Bali with beaches, surfing, and yoga.', 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=600')" style="aspect-ratio: 1/1; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: url('https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=600') center/cover; cursor: pointer;">
+            <span class="badge bg-dark/80 text-white w-100 text-center shadow-sm">Relax in Bali</span>
+          </div>
+        </div>
+        <div class="col-6 col-md-4">
+          <div class="overflow-hidden position-relative d-flex align-items-end p-2 suggestion-card" onclick="useSuggestion('Hiking the Alps', 'An adventurous trip through the majestic Swiss Alps.', 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=600')" style="aspect-ratio: 1/1; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=600') center/cover; cursor: pointer;">
+            <span class="badge bg-dark/80 text-white w-100 text-center shadow-sm">Hiking the Alps</span>
+          </div>
+        </div>
+        <div class="col-6 col-md-4">
+          <div class="overflow-hidden position-relative d-flex align-items-end p-2 suggestion-card" onclick="useSuggestion('Rome History', 'Discover the ancient history of Rome, the Colosseum, and the Vatican.', 'https://images.unsplash.com/photo-1552832230-c03140502393?q=80&w=600')" style="aspect-ratio: 1/1; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: url('https://images.unsplash.com/photo-1552832230-c03140502393?q=80&w=600') center/cover; cursor: pointer;">
+            <span class="badge bg-dark/80 text-white w-100 text-center shadow-sm">Rome History</span>
+          </div>
+        </div>
+        <div class="col-6 col-md-4">
+          <div class="overflow-hidden position-relative d-flex align-items-end p-2 suggestion-card" onclick="useSuggestion('Scuba Diving', 'A thrilling scuba diving trip in the Maldives exploring coral reefs.', 'https://images.unsplash.com/photo-1514361843105-0259b1227845?q=80&w=600')" style="aspect-ratio: 1/1; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: url('https://images.unsplash.com/photo-1514361843105-0259b1227845?q=80&w=600') center/cover; cursor: pointer;">
+            <span class="badge bg-dark/80 text-white w-100 text-center shadow-sm">Scuba Diving</span>
+          </div>
         </div>
       </div>
-      {% if form.non_field_errors %}<div class="text-danger small mt-2">{{ form.non_field_errors }}</div>{% endif %}
-      <div class="mt-4 d-flex gap-2">
-        <button class="btn btn-primary rounded-pill px-4">Save Trip</button>
-        <a href="{% url 'travel:my_trips' %}" class="btn btn-outline-light rounded-pill px-4">Cancel</a>
-      </div>
-    </form>
+    </div>
+
   </div>
 </section>
+
+<script>
+  function useSuggestion(title, description, imageUrl) {
+    const titleInput = document.getElementById('id_title');
+    const descInput = document.getElementById('id_description');
+    const urlInput = document.getElementById('id_suggested_cover_url');
+    const preview = document.getElementById('suggested_image_preview');
+    
+    if (titleInput) {
+      titleInput.value = title;
+      titleInput.style.transition = 'background-color 0.5s';
+      titleInput.style.backgroundColor = 'rgba(14, 165, 233, 0.4)';
+      setTimeout(() => { titleInput.style.backgroundColor = ''; }, 600);
+    }
+    
+    if (descInput) {
+      descInput.value = description;
+      descInput.style.transition = 'background-color 0.5s';
+      descInput.style.backgroundColor = 'rgba(14, 165, 233, 0.4)';
+      setTimeout(() => { descInput.style.backgroundColor = ''; }, 600);
+    }
+    
+    if (urlInput) {
+        urlInput.value = imageUrl;
+    }
+    
+    if (preview) {
+        preview.style.display = 'block';
+    }
+    
+    // Scroll smoothly back up to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+<!-- Injecting auth-input class dynamically into the rendered Django fields to maintain styling -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      if (input.type === 'checkbox') {
+        input.classList.add('form-check-input');
+        input.style.cursor = 'pointer';
+      } else if (input.type !== 'radio' && input.type !== 'hidden') {
+        input.classList.add('form-control', 'auth-input', 'shadow-none');
+        input.style.borderRadius = '8px';
+      }
+    });
+  });
+</script>
 {% endblock %}

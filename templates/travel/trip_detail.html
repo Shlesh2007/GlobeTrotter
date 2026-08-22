@@ -19,15 +19,16 @@
         <a href="{% url 'travel:notes_page' trip.id %}" class="btn btn-outline-light rounded-pill">Notes</a>
       </div>
     </div>
-    <div class="mt-3 d-flex gap-2">
+    <div class="mt-3 d-flex gap-2 align-items-center">
       <a href="{% url 'travel:trip_edit' trip.id %}" class="btn btn-sm btn-outline-light rounded-pill">Edit Trip</a>
-      <form method="post" action="{% url 'travel:trip_delete' trip.id %}">
+      <form method="post" action="{% url 'travel:trip_delete' trip.id %}" class="m-0">
         {% csrf_token %}
         <button class="btn btn-sm btn-outline-danger rounded-pill">Delete Trip</button>
       </form>
       {% if trip.is_public %}
       <a href="{% url 'travel:public_itinerary' trip.public_slug %}" class="btn btn-sm btn-outline-info rounded-pill">Public Link</a>
       {% endif %}
+      <span class="badge bg-secondary rounded-pill fw-normal ms-auto fs-6"><i class="bi bi-clock me-1"></i>{{ trip.total_days }} Days</span>
     </div>
   </div>
   <div class="row g-3">

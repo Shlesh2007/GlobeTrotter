@@ -2,9 +2,21 @@ import os
 import dj_database_url
 from pathlib import Path
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+# --- LOCAL .env LOADER ---
+# This automatically loads variables from a .env file if it exists
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    with open(env_path, 'r') as f:
+        for line in f:
+            if '=' in line and not line.strip().startswith('#'):
+                key, val = line.strip().split('=', 1)
+                os.environ.setdefault(key.strip(), val.strip())
+# -------------------------
+
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-for-local-dev-only')
 
 # DEBUG is True locally, False on Render
 DEBUG = 'RENDER' not in os.environ
@@ -110,7 +122,7 @@ LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 # Email settings
-# Email settings - Safe Version
+# Email settings - Real SMTP Version
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -124,3 +136,9 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Custom Authentication Backend to allow Email login
+AUTHENTICATION_BACKENDS = [
+    'travel.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]

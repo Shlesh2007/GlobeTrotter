@@ -24,7 +24,7 @@
             </div>
             <div class="d-flex justify-content-between mt-3 fs-5 fw-bold text-sky-200">
               <span>Per person</span>
-              <span id="booking-ppp">{{ price_per_person }}</span>
+              <span>₹<span id="booking-ppp">{{ price_per_person }}</span></span>
             </div>
           </div>
         </div>
@@ -41,10 +41,10 @@
             {% if field.help_text %}<div class="form-text text-white/45">{{ field.help_text }}</div>{% endif %}
             <div class="mb-3"></div>
             {% endfor %}
-            <div class="alert alert-dark border border-white/10 rounded-4 py-3 px-4 mb-4">
+            <div class="glass-card border border-white/10 rounded-4 py-3 px-4 mb-4">
               <div class="d-flex justify-content-between align-items-center">
                 <span class="text-white/70">Estimated total</span>
-                <span class="fs-4 fw-bold text-white">USD <span id="booking-total">{{ price_per_person }}</span></span>
+                <span class="fs-4 fw-bold text-white">₹<span id="booking-total">{{ price_per_person }}</span></span>
               </div>
               <small class="text-white/50">Calculated dynamically with vanilla JS; server recomputes on submit.</small>
             </div>

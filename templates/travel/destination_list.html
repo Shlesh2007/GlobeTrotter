@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Destinations{% endblock %}
+{% block favicon %}🗺️{% endblock %}
 
 {% block content %}
 <section class="relative py-28 overflow-hidden bg-slate-950">
@@ -22,7 +23,10 @@
                 <h2 class="h5 mb-0 font-display fw-semibold">{{ d.name }}</h2>
                 <span class="badge rounded-pill text-bg-secondary">{{ d.country }}</span>
               </div>
-              <p class="small text-white/60 mb-0">{{ d.short_description|truncatechars:120 }}</p>
+              <p class="small text-white/60 mb-3">{{ d.short_description|truncatechars:120 }}</p>
+              <div class="mt-auto">
+                <span class="btn btn-sm btn-outline-light rounded-pill w-100">View & Book</span>
+              </div>
             </div>
           </article>
         </a>

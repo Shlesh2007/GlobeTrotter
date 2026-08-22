@@ -34,7 +34,7 @@
             </td>
             <td>{{ b.travel_date|date:"M j, Y" }}</td>
             <td>{{ b.travelers_count }}</td>
-            <td class="fw-bold text-sky-200">${{ b.total_price }}</td>
+            <td class="fw-bold text-sky-200">₹{{ b.total_price }}</td>
             <td><span class="badge rounded-pill text-bg-secondary">{{ b.status }}</span></td>
           </tr>
           {% empty %}

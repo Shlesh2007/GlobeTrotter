@@ -2,71 +2,115 @@
 {% load static %}
 
 {% block title %}Search{% endblock %}
+{% block favicon %}🔍{% endblock %}
 
 {% block content %}
-<section class="py-28 bg-slate-950 text-white">
-  <div class="container">
-    <div class="row g-5">
-      <div class="col-lg-4">
-        <div class="glass-panel rounded-4 p-4">
-          <h1 class="h3 font-display fw-bold mb-3">Smart filters</h1>
-          <p class="small text-white/60 mb-4">Mix keyword search with price caps. Results update server-side via Django forms.</p>
-          <form method="get">
+<section class="py-4">
+  <div class="container-fluid p-lg-4" style="max-width: 900px;">
+    
+    <!-- Search & Filters Row -->
+    <div class="mb-5">
+      <form method="get" class="d-flex flex-column gap-3 w-100">
+        <div class="d-flex flex-column flex-md-row gap-3 align-items-center">
+          <input type="text" name="q" class="form-control auth-input flex-grow-1" placeholder="Search destinations or packages..." value="{{ request.GET.q|default:'' }}" style="border-radius: 12px; padding: 0.75rem 1.25rem; font-size: 1rem;">
+          <div class="d-flex gap-2">
+            
+            <div class="dropdown">
+              <button class="btn dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; color: white; padding: 0.75rem 1.25rem;">
+                <i class="bi bi-collection"></i> Group by
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1);">
+                <li><a class="dropdown-item text-white hover:bg-white/10" href="#">Destination</a></li>
+                <li><a class="dropdown-item text-white hover:bg-white/10" href="#">Package Type</a></li>
+              </ul>
+            </div>
+            
+            <button class="btn d-flex align-items-center gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; color: white; padding: 0.75rem 1.25rem;">
+              <i class="bi bi-funnel"></i> Filter
+            </button>
+
+            <div class="dropdown">
+              <button class="btn dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; color: white; padding: 0.75rem 1.25rem;">
+                <i class="bi bi-sort-down"></i> Sort by
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1);">
+                <li><a class="dropdown-item text-white hover:bg-white/10" href="#">Price: Low to High</a></li>
+                <li><a class="dropdown-item text-white hover:bg-white/10" href="#">Price: High to Low</a></li>
+              </ul>
+            </div>
+            
+            <button type="submit" class="btn btn-primary ms-2 d-flex align-items-center gap-2" style="border-radius: 12px; padding: 0.75rem 1.25rem;">
+              <i class="bi bi-search"></i> Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Advanced Filters (Restored for Functionality) -->
+        <div class="collapse" id="advancedFilters">
+          <div class="glass-card p-3 mt-2 d-flex gap-3 flex-wrap" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
             {% for field in form.visible_fields %}
-            <label class="form-label small text-white/65">{{ field.label }}</label>
-            {{ field.errors }}
-            <div class="mb-3">
               {% if field.name != 'q' %}
-              {{ field }}
-              {% else %}
-              {{ field }}
+              <div class="d-flex align-items-center gap-2">
+                <label class="text-white small mb-0">{{ field.label }}:</label>
+                {{ field }}
+              </div>
               {% endif %}
-            </div>
             {% endfor %}
-            <button class="btn w-100 rounded-pill fw-semibold border-0 text-slate-900" type="submit" style="background:linear-gradient(90deg,#38bdf8,#c084fc);">Apply filters</button>
-          </form>
-        </div>
-      </div>
-      <div class="col-lg-8">
-        <h2 class="h4 font-display mb-4">Destinations</h2>
-        <div class="row g-3 mb-5">
-          {% for d in destinations %}
-          <div class="col-md-6">
-            <a href="{{ d.get_absolute_url }}" class="text-decoration-none">
-              <div class="rounded-4 border border-white/10 bg-white/5 hover:bg-white/10 p-3 h-100 transition">
-                <h3 class="h6 text-white mb-1">{{ d.name }}</h3>
-                <p class="small text-white/55 mb-0">{{ d.country }}</p>
-              </div>
-            </a>
           </div>
-          {% empty %}
-          <p class="text-white/55">No destinations match — loosen your filters.</p>
-          {% endfor %}
         </div>
-        <h2 class="h4 font-display mb-4">Packages</h2>
-        <div class="row g-4">
-          {% for pkg in packages %}
-          <div class="col-md-6">
-            <div class="glass-panel p-3 rounded-4 h-100 d-flex flex-column">
-              <img src="{{ pkg.image_url }}" class="rounded-3 mb-3 w-100" alt="" style="height:150px;object-fit:cover;">
-              <h3 class="h6 text-white">{{ pkg.name }}</h3>
-              <p class="small text-white/60 flex-grow-1">{{ pkg.headline|truncatechars:90 }}</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="text-sky-200 fw-bold">${{ pkg.price_per_person }}</span>
-                {% if user.is_authenticated %}
-                <a class="btn btn-sm btn-light rounded-pill" href="{% url 'travel:package_book' pkg.id %}">Book</a>
-                {% else %}
-                <a class="btn btn-sm btn-outline-light rounded-pill" href="{% url 'login' %}">Login</a>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-          {% empty %}
-          <p class="text-white/55">No packages match — try another keyword range.</p>
-          {% endfor %}
-        </div>
-      </div>
+      </form>
     </div>
+
+    <!-- Search Results Stack -->
+    <div class="mb-5">
+      <h2 class="h6 text-white mb-3 fw-bold">Results</h2>
+      
+      <!-- Destinations List -->
+      {% for d in destinations %}
+      <div class="glass-card p-3 mb-3 d-flex align-items-center justify-content-between" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; min-height: 80px;">
+        <div>
+          <span class="text-white fw-bold me-2">{{ d.name }}</span>
+          <span class="text-white/50 small">Destination in {{ d.country }}</span>
+        </div>
+        <a href="{{ d.get_absolute_url }}" class="btn btn-sm btn-outline-light rounded-pill px-4">View</a>
+      </div>
+      {% endfor %}
+
+      <!-- Packages List -->
+      {% for pkg in packages %}
+      <div class="glass-card p-3 mb-3 d-flex align-items-center justify-content-between" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; min-height: 80px;">
+        <div>
+          <span class="text-white fw-bold me-2">{{ pkg.name }}</span>
+          <span class="text-white/50 small">Package · ₹{{ pkg.price_per_person }}</span>
+        </div>
+        {% if user.is_authenticated %}
+        <a href="{% url 'travel:package_book' pkg.id %}" class="btn btn-sm btn-outline-light rounded-pill px-4">Book</a>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light rounded-pill px-4">Login</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      {% if not destinations and not packages %}
+      <div class="glass-card p-4 d-flex align-items-center justify-content-center" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; min-height: 120px;">
+        <span class="text-white/50">No results match your search.</span>
+      </div>
+      {% endif %}
+
+    </div>
+
   </div>
 </section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      if(input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'hidden') {
+        input.classList.add('form-control', 'auth-input', 'shadow-none');
+        input.style.borderRadius = '8px';
+      }
+    });
+  });
+</script>
 {% endblock %}

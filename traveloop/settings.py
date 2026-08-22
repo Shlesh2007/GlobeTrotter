@@ -22,7 +22,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-for-local
 DEBUG = True
 
 # Allow local and Render hosts
-ALLOWED_HOSTS = ["127.0.0.1", "localhost","*"]
+ALLOWED_HOSTS = [
+    "globetrotter-axrz.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -71,15 +75,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "traveloop.wsgi.application"
+import os
+import dj_database_url
 
-# Database Configuration
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    )
 }
-
 # Critical Change: Force SSL for PostgreSQL on Render
 if not DEBUG:
     database_url = os.environ.get('DATABASE_URL')

@@ -1,4 +1,3 @@
-# render.yaml  (must be in the repository root)
 services:
   - type: web
     name: globe-trotter
@@ -16,6 +15,6 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase: globe_trotter_db    # <-- you’ll create this DB in Render
+        fromDatabase: globe_trotter_db
     autoDeploy: true
     healthCheckPath: "/"

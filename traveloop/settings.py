@@ -19,7 +19,7 @@ if env_path.exists():
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-for-local-dev-only')
 
 # DEBUG is True locally, False on Render
-DEBUG = 'RENDER' not in os.environ
+DEBUG = True
 
 # Allow local and Render hosts
 ALLOWED_HOSTS = ["127.0.0.1", "localhost","*"]

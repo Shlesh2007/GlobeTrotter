@@ -29,9 +29,6 @@
 - Python 3.10+
 - Git
 
-### 🌐 Try the Live App!
-If you just want to test the application, visit our live demo: [https://traveloop-1-8f1k.onrender.com](https://traveloop-1-8f1k.onrender.com)
-
 > **Demo Login (Normal User):**
 > Email/Username: `sndarji172007@gmail.com`
 > Password: `Naiya@2002`
@@ -46,8 +43,8 @@ If you just want to test the application, visit our live demo: [https://traveloo
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Shlesh2007/Traveloop.git
-cd Traveloop
+git clone https://github.com/Shlesh2007/GlobeTrotter.git
+cd GlobeTrotter(LDEC_odoo)
 ```
 
 ### 2. Set up a virtual environment
